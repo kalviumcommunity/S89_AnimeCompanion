@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anime Companion Chatbot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        #chat-container {
+            width: 400px;
+            height: 600px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        #chat-window {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            border-bottom: 1px solid #eee;
+        }
+        .message-user {
+            background-color: #dcf8c6;
+            padding: 10px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            align-self: flex-end;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+        .message-bot {
+            background-color: #f1f0f0;
+            padding: 10px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            align-self: flex-start;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+        #chat-form {
+            display: flex;
+            padding: 15px;
+        }
+        #user-input {
+            flex: 1;
+            padding: 10px;
+            border-radius: 20px;
+            border: 1px solid #ccc;
+            margin-right: 10px;
+        }
+        #chat-form button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+        #chat-form button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div id="chat-container">
+        <div id="chat-window">
+            <div class="message-bot">Hello! I am your Anime Companion. How can I help you today?</div>
+        </div>
+        <form id="chat-form">
+            <input type="text" id="user-input" placeholder="Ask me about anime..." required>
+            <button type="submit">Send</button>
+        </form>
+    </div>
+
+    <script>
+        const chatForm = document.getElementById('chat-form');
+        const userInput = document.getElementById('user-input');
+        const chatWindow = document.getElementById('chat-window');
+        let sessionId = 'default-session'; // A simple way to manage session
+
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const prompt = userInput.value;
+            userInput.value = '';
+
+            // Display user message
+            appendMessage(prompt, 'user');
+
+            try {
+                // Send request to your backend with the session ID
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt, sessionId })
+                });
+
+                const data = await response.json();
+                
+                // Update session ID if it's new
+                sessionId = data.sessionId;
+
+                // Display bot message
+                appendMessage(data.message, 'bot');
+
+            } catch (error) {
+                console.error('Error:', error);
+                appendMessage('Error: Failed to get response from bot.', 'bot');
+            }
+        });
+
+        function appendMessage(text, sender) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add(sender === 'user' ? 'message-user' : 'message-bot');
+            messageElement.textContent = text;
+            chatWindow.appendChild(messageElement);
+            chatWindow.scrollTop = chatWindow.scrollHeight; // Auto-scroll to the bottom
+        }
+    </script>
+</body>
+</html>

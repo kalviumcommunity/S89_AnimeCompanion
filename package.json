@@ -1,0 +1,26 @@
+{
+  "name": "s89_animecompanion",
+  "version": "1.0.0",
+  "description": "**Anime Companion** is an AI assistant built for anime fans. It helps users with episode summaries, anime recommendations, character info, and trivia powered by LLMs.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kalviumcommunity/S89_AnimeCompanion.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/kalviumcommunity/S89_AnimeCompanion/issues"
+  },
+  "homepage": "https://github.com/kalviumcommunity/S89_AnimeCompanion#readme",
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0"
+  }
+}
