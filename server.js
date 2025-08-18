@@ -29,7 +29,7 @@ app.post('/chat', async (req, res) => {
         const sessionId = req.body.sessionId || 'default-session'; 
         let chat = userChats.get(sessionId);
 
-        // If no chat session exists for this user, start a new one with the system prompt
+        // If no chat session exists for this user, start a new one with the system promptt
         if (!chat) {
             chat = model.startChat({
                 history: [
