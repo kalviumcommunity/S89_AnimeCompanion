@@ -41,7 +41,7 @@ const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
 
 // Define the generation configuration here
 const generationConfig = {
-    topK: 40         // Adjusts Top K sampling. The model considers only the top 40 most likely tokens.
+   temperature: 0.8
 };
 
 // Initialize the Gemini model with your API key and the new generation configuration
