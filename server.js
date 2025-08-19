@@ -41,7 +41,7 @@ const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
 
 // Define the generation configuration here
 const generationConfig = {
-   temperature: 0.8
+    topP: 0.95
 };
 
 // Initialize the Gemini model with your API key and the new generation configuration
