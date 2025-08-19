@@ -38,7 +38,17 @@ app.use(limiter);
 
 // --- Gemini API & System Prompt ---
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+// Define the generation configuration here
+const generationConfig = {
+    topK: 40         // Adjusts Top K sampling. The model considers only the top 40 most likely tokens.
+};
+
+// Initialize the Gemini model with your API key and the new generation configuration
+const model = genAI.getGenerativeModel({ 
+    model: "gemini-1.5-flash",
+    generationConfig: generationConfig 
+});
 
 const systemPrompt = "You are Anime Companion, an AI assistant built for anime fans. Your purpose is to help users with episode summaries, anime recommendations, character information, and trivia. Your tone is friendly, knowledgeable, and a bit playful, like a fellow anime enthusiast. Always prioritize providing accurate information and, where possible, use emojis to enhance the fan experience.";
 
