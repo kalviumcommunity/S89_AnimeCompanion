@@ -5,148 +5,72 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Anime Companion Chatbot</title>
     <style>
-        /* General body and container styling */
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background-color: #171717; /* Dark background */
-            color: #d1d1d1;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
-            padding: 20px;
-            box-sizing: border-box;
         }
-
         #chat-container {
-            width: 100%;
-            max-width: 900px; /* Wider container */
-            height: 100%;
-            max-height: 800px;
-            background-color: #2b2b2b; /* Darker chat background */
-            border-radius: 12px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+            width: 400px;
+            height: 600px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
             display: flex;
             flex-direction: column;
             overflow: hidden;
         }
-
-        /* Chat window styling */
         #chat-window {
             flex: 1;
-            padding: 20px 30px;
-            overflow-y: auto;
-            border-bottom: 1px solid #3a3a3a;
-        }
-
-        /* Custom Scrollbar for WebKit browsers */
-        #chat-window::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        #chat-window::-webkit-scrollbar-track {
-            background: #2b2b2b;
-        }
-
-        #chat-window::-webkit-scrollbar-thumb {
-            background-color: #555;
-            border-radius: 4px;
-            border: 2px solid #2b2b2b;
-        }
-        
-        /* Message styling */
-        .message-user {
-            background-color: #4a4a4a;
-            color: #f1f1f1;
-            padding: 12px 18px;
-            border-radius: 20px;
-            margin-bottom: 15px;
-            align-self: flex-end;
-            max-width: 70%;
-            word-wrap: break-word;
-            line-height: 1.5;
-            animation: fadeIn 0.3s ease-in-out;
-        }
-
-        .message-bot {
-            background-color: #505050;
-            color: #d1d1d1;
-            padding: 12px 18px;
-            border-radius: 20px;
-            margin-bottom: 15px;
-            align-self: flex-start;
-            max-width: 70%;
-            word-wrap: break-word;
-            line-height: 1.5;
-            animation: fadeIn 0.3s ease-in-out;
-        }
-
-        /* Markdown-like styling for bot messages */
-        .message-bot h1, .message-bot h2, .message-bot h3 { color: #f1f1f1; margin-top: 10px; margin-bottom: 5px; }
-        .message-bot p { margin: 0; }
-        .message-bot ul, .message-bot ol { margin: 10px 0 10px 20px; }
-        .message-bot li { margin-bottom: 5px; }
-        .message-bot code {
-            background-color: rgba(255, 255, 255, 0.1);
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-family: 'Courier New', Courier, monospace;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Input form styling */
-        #chat-form {
-            position: relative;
             padding: 20px;
-            display: flex;
-            align-items: flex-end; /* Align to the bottom of the flex container */
+            overflow-y: auto;
+            border-bottom: 1px solid #eee;
         }
-
+        .message-user {
+            background-color: #dcf8c6;
+            padding: 10px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            align-self: flex-end;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+        .message-bot {
+            background-color: #f1f0f0;
+            padding: 10px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            align-self: flex-start;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+        #chat-form {
+            display: flex;
+            padding: 15px;
+        }
         #user-input {
             flex: 1;
-            padding: 15px 50px 15px 20px; /* Add space for the button */
-            border-radius: 25px;
-            border: 1px solid #555;
-            background-color: #3a3a3a;
-            color: #f1f1f1;
-            resize: none; /* Prevent manual resizing */
-            min-height: 50px;
-            max-height: 200px;
-            line-height: 1.5;
-            box-sizing: border-box;
-            font-size: 16px;
-        }
-
-        #user-input:focus {
-            outline: none;
-            border-color: #007bff;
-        }
-
-        #chat-form button {
-            position: absolute;
-            right: 25px;
-            bottom: 25px;
-            background-color: transparent;
-            color: #007bff;
-            border: none;
             padding: 10px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 24px;
-            transition: color 0.2s ease;
+            border-radius: 20px;
+            border: 1px solid #ccc;
+            margin-right: 10px;
         }
-
-        #chat-form button:hover {
-            color: #f1f1f1;
+        #chat-form button {
             background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+        #chat-form button:hover {
+            background-color: #0056b3;
         }
     </style>
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
     <div id="chat-container">
@@ -154,10 +78,8 @@
             <div class="message-bot">Hello! I am your Anime Companion. How can I help you today?</div>
         </div>
         <form id="chat-form">
-            <textarea id="user-input" placeholder="Ask me about anime..." required rows="1"></textarea>
-            <button type="submit">
-                <i class="material-icons">send</i>
-            </button>
+            <input type="text" id="user-input" placeholder="Ask me about anime..." required>
+            <button type="submit">Send</button>
         </form>
     </div>
 
@@ -165,21 +87,12 @@
         const chatForm = document.getElementById('chat-form');
         const userInput = document.getElementById('user-input');
         const chatWindow = document.getElementById('chat-window');
-        let sessionId = 'default-session';
-
-        // Auto-resize the textarea based on content
-        userInput.addEventListener('input', () => {
-            userInput.style.height = 'auto';
-            userInput.style.height = userInput.scrollHeight + 'px';
-        });
+        let sessionId = 'default-session'; // A simple way to manage session
 
         chatForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const prompt = userInput.value.trim();
-            if (!prompt) return;
-
+            const prompt = userInput.value;
             userInput.value = '';
-            userInput.style.height = 'auto'; // Reset textarea height
 
             // Display user message
             appendMessage(prompt, 'user');
@@ -209,14 +122,9 @@
         function appendMessage(text, sender) {
             const messageElement = document.createElement('div');
             messageElement.classList.add(sender === 'user' ? 'message-user' : 'message-bot');
-            
-            // To support Markdown-like styling, we can use a library.
-            // For simplicity here, we'll just add the text content directly.
-            // You can explore libraries like 'marked.js' to parse markdown from the bot's response.
             messageElement.textContent = text;
-            
             chatWindow.appendChild(messageElement);
-            chatWindow.scrollTop = chatWindow.scrollHeight;
+            chatWindow.scrollTop = chatWindow.scrollHeight; // Auto-scroll to the bottom
         }
     </script>
 </body>

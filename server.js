@@ -1,6 +1,12 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const { GoogleGenerativeAI } = require("@google/generative-ai");
+const rateLimit = require("express-rate-limit");
+const cors = require('cors');
+const mongoose = require('mongoose');
+
+// Import the ChatSession model from the schema file
+const ChatSession = require('./schema'); 
 
 // Load environment variables from .env file
 dotenv.config();
@@ -8,58 +14,78 @@ dotenv.config();
 const app = express();
 const port = 3000;
 
-// Enable JSON body parsing and serve static files
+// --- MongoDB Configuration ---
+const uri = process.env.MONGODB_URI;
+
+mongoose.connect(uri)
+    .then(() => console.log("Connected to MongoDB! 🚀"))
+    .catch(err => {
+        console.error("Failed to connect to MongoDB:", err);
+        process.exit(1);
+    });
+
+// --- API Security & Middleware ---
 app.use(express.json());
-app.use(express.static('public')); 
+app.use(express.static('public'));
+app.use(cors());
 
-// --- System Prompt ---
-const systemPrompt = "You are Anime Companion, an AI assistant built for anime fans. Your purpose is to help users with episode summaries, anime recommendations, character information, and trivia. Your tone is friendly, knowledgeable, and a bit playful, like a fellow anime enthusiast. Always prioritize providing accurate information and, where possible, use emojis to enhance the fan experience.";
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+    message: "Too many requests from this IP, please try again after 15 minutes."
+});
+app.use(limiter);
 
-// Initialize the Gemini model with your API key
+// --- Gemini API & System Prompt ---
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-// Map to store a chat session for each user (for a real app, this would be a database)
-const userChats = new Map();
+const systemPrompt = "You are Anime Companion, an AI assistant built for anime fans. Your purpose is to help users with episode summaries, anime recommendations, character information, and trivia. Your tone is friendly, knowledgeable, and a bit playful, like a fellow anime enthusiast. Always prioritize providing accurate information and, where possible, use emojis to enhance the fan experience.";
 
 // A simple API endpoint for the chatbot
 app.post('/chat', async (req, res) => {
     try {
-        // Use a session ID to manage a persistent chat for each user
-        const sessionId = req.body.sessionId || 'default-session'; 
-        let chat = userChats.get(sessionId);
-
-        // If no chat session exists for this user, start a new one with the system promptt
-        if (!chat) {
-            chat = model.startChat({
-                history: [
-                    {
-                        role: "user",
-                        parts: [{ text: systemPrompt }]
-                    },
-                    {
-                        role: "model",
-                        parts: [{ text: "Hello! I am your Anime Companion. How can I help you today?" }]
-                    }
-                ]
-            });
-            userChats.set(sessionId, chat);
-        }
-
-        const userPrompt = req.body.prompt;
+        const { sessionId = 'default-session', prompt: userPrompt } = req.body;
         
         if (!userPrompt) {
             return res.status(400).json({ error: 'Prompt is required.' });
         }
-        
+
+        let chatSession = await ChatSession.findOne({ sessionId: sessionId });
+        let chat;
+
+        if (!chatSession) {
+            const initialHistory = [
+                { role: "user", parts: [{ text: systemPrompt }] },
+                { role: "model", parts: [{ text: "Hello! I am your Anime Companion. How can I help you today?" }] }
+            ];
+            chatSession = new ChatSession({
+                sessionId: sessionId,
+                history: initialHistory,
+                createdAt: new Date()
+            });
+            await chatSession.save();
+            chat = model.startChat({ history: initialHistory });
+        } else {
+            chat = model.startChat({ history: chatSession.history });
+        }
+
         const result = await chat.sendMessage(userPrompt);
         const responseText = result.response.text();
+
+        // Update the history in the database
+        chatSession.history.push(
+            { role: "user", parts: [{ text: userPrompt }] },
+            { role: "model", parts: [{ text: responseText }] }
+        );
+        chatSession.updatedAt = new Date();
+        await chatSession.save();
 
         res.json({ message: responseText, sessionId: sessionId });
 
     } catch (error) {
-        console.error('Error generating content:', error);
-        res.status(500).json({ error: 'Failed to generate content.' });
+        console.error('Error in chat endpoint:', error);
+        res.status(500).json({ error: 'Failed to process chat message.' });
     }
 });
 
