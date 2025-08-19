@@ -53,27 +53,38 @@ app.post('/chat', async (req, res) => {
 
         let chatSession = await ChatSession.findOne({ sessionId: sessionId });
         let chat;
+        let history = [];
 
         if (!chatSession) {
-            const initialHistory = [
+            // First time this user has messaged. Create a new session.
+            history = [
                 { role: "user", parts: [{ text: systemPrompt }] },
                 { role: "model", parts: [{ text: "Hello! I am your Anime Companion. How can I help you today?" }] }
             ];
             chatSession = new ChatSession({
                 sessionId: sessionId,
-                history: initialHistory,
+                history: history,
                 createdAt: new Date()
             });
             await chatSession.save();
-            chat = model.startChat({ history: initialHistory });
         } else {
-            chat = model.startChat({ history: chatSession.history });
+            // User exists, so use their history.
+            history = chatSession.history;
         }
 
+        // Add the user's new prompt to the history for token counting
+        const currentHistory = [...history, { role: "user", parts: [{ text: userPrompt }] }];
+
+        // Count the total tokens in the request
+        const { totalTokens } = await model.countTokens({ contents: currentHistory });
+        console.log(`Tokens used for this API call: ${totalTokens}`);
+
+        // Start chat with the retrieved history
+        chat = model.startChat({ history: history });
         const result = await chat.sendMessage(userPrompt);
         const responseText = result.response.text();
 
-        // Update the history in the database
+        // Update the history with the new messages
         chatSession.history.push(
             { role: "user", parts: [{ text: userPrompt }] },
             { role: "model", parts: [{ text: responseText }] }
