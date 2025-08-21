@@ -1,14 +1,6 @@
 const mongoose = require('mongoose');
 
-// Define the schema for the 'parts' array inside a message
-const partSchema = new mongoose.Schema({
-    text: {
-        type: String,
-        required: true
-    }
-}, { _id: false }); // Disable the default _id for subdocuments
-
-// Define the schema for a single message in the chat history
+// Define a schema for a single message in the chat history
 const messageSchema = new mongoose.Schema({
     role: {
         type: String,
@@ -16,7 +8,10 @@ const messageSchema = new mongoose.Schema({
         enum: ['user', 'model']
     },
     parts: {
-        type: [partSchema],
+        type: [new mongoose.Schema({
+            text: { type: String },
+            json: { type: mongoose.Schema.Types.Mixed }
+        }, { _id: false })],
         required: true
     }
 }, { _id: false });
@@ -42,7 +37,6 @@ const chatSessionSchema = new mongoose.Schema({
     }
 });
 
-// Create and export the Mongoose model
 const ChatSession = mongoose.model('ChatSession', chatSessionSchema);
 
 module.exports = ChatSession;
