@@ -1,0 +1,92 @@
+/* frontend/src/components/ChatWindow.css */
+
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    height: 80vh; /* Adjust as needed */
+    max-width: 700px;
+    margin: 20px auto;
+    border: 2px solid #ccc; /* Anime style border */
+    border-radius: 10px;
+    overflow: hidden;
+    background-color: #f9f9f9;
+}
+
+.chat-messages {
+    flex-grow: 1;
+    padding: 15px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.initial-message {
+    text-align: center;
+    color: #888;
+    margin-top: 20px;
+}
+
+.message-bubble {
+    padding: 10px;
+    border-radius: 8px;
+    max-width: 80%;
+    line-height: 1.4;
+    word-wrap: break-word;
+}
+
+.user {
+    align-self: flex-end;
+    background-color: #4CAF50; /* A green "hero" color */
+    color: white;
+}
+
+.model {
+    align-self: flex-start;
+    background-color: #3f51b5; /* A blue "AI" color */
+    color: white;
+}
+
+.model strong, .user strong {
+    display: block;
+    margin-bottom: 3px;
+    font-size: 0.9em;
+}
+
+.chat-input-form {
+    display: flex;
+    padding: 10px;
+    border-top: 1px solid #ccc;
+    background-color: white;
+}
+
+.chat-input-form input {
+    flex-grow: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-right: 10px;
+}
+
+.chat-input-form button {
+    padding: 10px 15px;
+    background-color: #f44336; /* A contrasting anime red */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.chat-input-form button:disabled {
+    background-color: #aaa;
+    cursor: not-allowed;
+}
+
+/* Optional: Add basic global styles to App.css */
+/* frontend/src/App.css */
+.app-container {
+    text-align: center;
+}
+.app-header {
+    margin-bottom: 20px;
+}
