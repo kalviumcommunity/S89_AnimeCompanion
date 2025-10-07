@@ -1,324 +1,386 @@
-// // frontend/src/components/ChatWindow.jsx
-// import React, { useState, useRef, useEffect } from 'react';
+
+
+// // frontend/src/components/ChatWindow.jsx (UPDATED)
+// import React, { useState, useRef, useEffect, useCallback } from 'react';
 // import axios from 'axios';
-// import './ChatWindow.css'; // We'll define simple styles below
-
-// const API_BASE_URL = 'http://localhost:3001/api/ai/chat';
-
-// function ChatWindow() {
-//   // State for the conversation history
-//   const [history, setHistory] = useState([]); 
-//   // State for the current user input
-//   const [input, setInput] = useState('');
-//   // State to disable input while waiting for AI response
-//   const [isLoading, setIsLoading] = useState(false);
-
-//   // Ref to automatically scroll to the latest message
-//   const messagesEndRef = useRef(null);
-
-//   // Scroll to the bottom of the chat window whenever history changes
-//   useEffect(() => {
-//     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-//   }, [history]);
-
-
-//   // Handles sending the message to the backend
-//   const handleSend = async (e) => {
-//     e.preventDefault();
-//     if (!input.trim() || isLoading) return;
-
-//     const userPrompt = input.trim();
-//     // 1. Add user message to history immediately
-//     const newUserMessage = { sender: 'user', text: userPrompt };
-    
-//     // Convert history to the format required by the backend
-//     const conversationHistory = [...history, newUserMessage];
-//     setHistory(conversationHistory); 
-    
-//     setInput('');
-//     setIsLoading(true);
-
-//     try {
-//       // 2. Make the API call to your Express backend
-//       const response = await axios.post(API_BASE_URL, {
-//         userPrompt: userPrompt,
-//         // Send the entire current history so the AI has context
-//         conversationHistory: history, 
-//       });
-
-//       // 3. Add AI response to history
-//       const aiMessage = { 
-//         sender: 'model', 
-//         text: response.data.text 
-//       };
-      
-//       setHistory(prevHistory => [...prevHistory, aiMessage]);
-
-//     } catch (error) {
-//       console.error("Error fetching AI response:", error);
-//       const errorMessage = { 
-//         sender: 'model', 
-//         text: "Error: Sorry, the Anime Companion is currently unavailable. Check the backend server." 
-//       };
-//       setHistory(prevHistory => [...prevHistory, errorMessage]);
-
-//     } finally {
-//       setIsLoading(false);
-//     }
-//   };
-
-//   return (
-//     <div className="chat-container">
-//       <div className="chat-messages">
-//         {history.length === 0 && (
-//             <div className="initial-message">
-//                 Welcome! Ask me a question about your favorite anime!
-//             </div>
-//         )}
-//         {history.map((message, index) => (
-//           <div 
-//             key={index} 
-//             className={`message-bubble ${message.sender}`}
-//           >
-//             <strong>{message.sender === 'user' ? 'You:' : 'Anime Companion:'}</strong>
-//             <p>{message.text}</p>
-//           </div>
-//         ))}
-
-//         {isLoading && (
-//           <div className="message-bubble model loading">
-//             <p>Anime Companion is thinking...</p>
-//           </div>
-//         )}
-//         <div ref={messagesEndRef} />
-//       </div>
-
-//       <form onSubmit={handleSend} className="chat-input-form">
-//         <input
-//           type="text"
-//           value={input}
-//           onChange={(e) => setInput(e.target.value)}
-//           placeholder={isLoading ? "Waiting for response..." : "Ask your question..."}
-//           disabled={isLoading}
-//         />
-//         <button type="submit" disabled={isLoading}>
-//           {isLoading ? '⏳' : 'Send'}
-//         </button>
-//       </form>
-//     </div>
-//   );
-// }
-
-// export default ChatWindow;
-
-
-// // frontend/src/components/ChatWindow.jsx
-// import React, { useState, useRef, useEffect } from 'react';
-// import axios from 'axios';
-// import { useAuth } from '../context/AuthContext'; // <--- NEW IMPORT
+// import { useAuth } from '../context/AuthContext'; 
+// import Cookies from 'js-cookie'; 
 // import './ChatWindow.css'; 
 
-// const API_BASE_URL = 'http://localhost:3001/api/ai/chat';
+// const API_BASE_URL = 'http://localhost:3001/api/ai';
+
+// // Helper function to format date
+// const formatChatDate = (dateString) => {
+//     return new Date(dateString).toLocaleDateString('en-US', {
+//         month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+//     });
+// };
+
 
 // function ChatWindow() {
-//   const { token, user, isAuthenticated } = useAuth(); // <--- ACCESS TOKEN, USER, and AUTH STATUS
+//   const { token, user, isAuthenticated } = useAuth(); 
   
-//   // State for the conversation history
 //   const [history, setHistory] = useState([]); 
-//   // State for the current user input
+//   const [conversationId, setConversationId] = useState(null); 
+//   const [conversationList, setConversationList] = useState([]); // <--- NEW STATE: List of all chats
 //   const [input, setInput] = useState('');
-//   // State to disable input while waiting for AI response
 //   const [isLoading, setIsLoading] = useState(false);
+//   const [isHistoryLoading, setIsHistoryLoading] = useState(false); 
+//   const [isListLoading, setIsListLoading] = useState(true); // <--- NEW STATE: Loading the list
 
-//   // Ref to automatically scroll to the latest message
 //   const messagesEndRef = useRef(null);
 
-//   // Scroll to the bottom of the chat window whenever history changes
+//   // --- Core function to fetch history for a specific ID ---
+//   const fetchMessages = useCallback(async (id) => {
+//       if (!id || !isAuthenticated) return;
+      
+//       setIsHistoryLoading(true);
+//       Cookies.set('last-conversation-id', id, { expires: 7, secure: false, sameSite: 'Lax' });
+      
+//       try {
+//           const config = { headers: { 'Authorization': `Bearer ${token}` } };
+//           // NOTE: Uses the CORRECT route: /conversations/:id
+//           const response = await axios.get(`${API_BASE_URL}/conversations/${id}`, config);
+          
+//           setHistory(response.data.messages);
+//           setConversationId(response.data.conversationId);
+          
+//       } catch (error) {
+//           console.error("Error fetching specific conversation:", error.response?.data || error.message);
+//           Cookies.remove('last-conversation-id');
+//           setConversationId(null);
+//           setHistory([]);
+//       } finally {
+//           setIsHistoryLoading(false);
+//       }
+//   }, [isAuthenticated, token]);
+
+
+//   // --- 1. CONVERSATION LIST HOOK (Loads all chat summaries on login) ---
+//   useEffect(() => {
+//     if (!isAuthenticated) {
+//         setConversationList([]);
+//         setIsListLoading(false);
+//         return;
+//     }
+
+//     const loadConversationList = async () => {
+//         setIsListLoading(true);
+//         try {
+//             const config = { headers: { 'Authorization': `Bearer ${token}` } };
+//             // CRITICAL: Fetch the list of ALL chats from the new endpoint
+//             const response = await axios.get(`${API_BASE_URL}/conversations`, config); 
+            
+//             setConversationList(response.data);
+            
+//             // Auto-load the most recent chat or the one saved in the cookie
+//             const lastId = Cookies.get('last-conversation-id');
+//             const targetId = lastId && response.data.some(c => c._id === lastId) 
+//                                ? lastId
+//                                : response.data[0]?._id; 
+            
+//             if (targetId) {
+//                 // Load the messages for the selected chat
+//                 fetchMessages(targetId);
+//             } else {
+//                 setHistory([]); // Start with a clean slate
+//             }
+
+//         } catch (error) {
+//             console.error("Error loading conversation list:", error.response?.data || error.message);
+//             // Clear history if loading the list fails
+//             setConversationList([]);
+//             setHistory([]);
+//         } finally {
+//             setIsListLoading(false);
+//         }
+//     };
+    
+//     // Clear states and reload list when auth status changes
+//     setHistory([]);
+//     setConversationId(null);
+//     loadConversationList();
+    
+//   }, [isAuthenticated, token, fetchMessages]); 
+
+
+//   // --- New Chat Handler ---
+//   const startNewChat = () => {
+//       setConversationId(null);
+//       setHistory([]);
+//       Cookies.remove('last-conversation-id');
+//   };
+  
+//   // Scroll to the bottom whenever history changes
 //   useEffect(() => {
 //     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-//   }, [history]);
-
-
-//   // Handles sending the message to the backend
+//   }, [history, isHistoryLoading]);
+  
+//   // Handles sending the message to the backend (remains mostly the same)
 //   const handleSend = async (e) => {
+//     // ... (Keep your existing handleSend logic here) ...
+//     // The only change is in the API call, which uses the /chat endpoint
+//     // and sends the current conversationId.
 //     e.preventDefault();
 //     if (!input.trim() || isLoading) return;
+    
+//     // ... (Keep your existing optimistic update and state changes) ...
 
 //     const userPrompt = input.trim();
-//     // 1. Add user message to history immediately
 //     const newUserMessage = { sender: 'user', text: userPrompt };
-    
-//     // Convert history to the format required by the backend
-//     const conversationHistory = [...history, newUserMessage];
-//     setHistory(conversationHistory); 
-    
+//     setHistory(prevHistory => [...prevHistory, newUserMessage]); 
 //     setInput('');
 //     setIsLoading(true);
 
 //     try {
-//       // Configure headers to include the JWT token if available
-//       const config = {
-//           headers: {
-//               // Attach the token in the Authorization header (Bearer scheme)
-//               'Authorization': token ? `Bearer ${token}` : '', 
-//               'Content-Type': 'application/json'
-//           }
-//       };
-      
-//       // 2. Make the API call to your Express backend
-//       const response = await axios.post(API_BASE_URL, {
-//         userPrompt: userPrompt,
-//         // Send the entire current history so the AI has context
-//         conversationHistory: history, 
-//       }, config); // <--- PASS THE CONFIG OBJECT WITH THE TOKEN
+//       const config = { headers: { 'Authorization': token ? `Bearer ${token}` : '', 'Content-Type': 'application/json' } };
+//       const payload = { userPrompt: userPrompt, conversationId: conversationId };
 
-//       // 3. Add AI response to history
-//       const aiMessage = { 
-//         sender: 'model', 
-//         text: response.data.text 
-//       };
-      
+//       const response = await axios.post(`${API_BASE_URL}/chat`, payload, config);
+
+//       if (response.data.conversationId) {
+//           const newId = response.data.conversationId;
+//           setConversationId(newId);
+//           Cookies.set('last-conversation-id', newId, { expires: 7, secure: false, sameSite: 'Lax' });
+          
+//           // CRITICAL: Refresh the list if this was a brand new chat
+//           if (!conversationId) {
+//              const listResponse = await axios.get(`${API_BASE_URL}/conversations`, config);
+//              setConversationList(listResponse.data);
+//           }
+//       }
+
+//       const aiMessage = { sender: 'model', text: response.data.text };
 //       setHistory(prevHistory => [...prevHistory, aiMessage]);
 
 //     } catch (error) {
 //       console.error("Error fetching AI response:", error.response?.data || error.message);
-//       const errorMessage = { 
-//         sender: 'model', 
-//         text: `Error: Sorry, the Anime Companion is currently unavailable. Status: ${error.response?.status || 'Network Error'}` 
-//       };
-//       setHistory(prevHistory => [...prevHistory, errorMessage]);
-
+//       const errorMessage = { sender: 'model', text: `Error: Sorry, the Anime Companion is currently unavailable. Status: ${error.response?.status || 'Network Error'}` };
+      
+//       setHistory(prevHistory => {
+//           const updatedHistory = [...prevHistory];
+//           updatedHistory.pop(); 
+//           updatedHistory.push(errorMessage);
+//           return updatedHistory;
+//       });
 //     } finally {
 //       setIsLoading(false);
 //     }
 //   };
 
+
+//   if (isListLoading) {
+//       return (
+//           <div className="chat-container loading-state">
+//               <p>Loading your chat history... 🍥</p>
+//           </div>
+//       );
+//   }
+
 //   return (
-//     <div className="chat-container">
-//       <div className="chat-messages">
-//         {history.length === 0 && (
-//             <div className="initial-message">
-//                 Welcome! {isAuthenticated ? `Logged in as ${user.username}. Ask for a personalized recommendation!` : 'Login to unlock personalized recommendations.'}
+//     <div className="main-chat-layout">
+//         {/* Sidebar for History List (Only visible if authenticated) */}
+//         {isAuthenticated && (
+//             <div className="chat-sidebar">
+//                 <button onClick={startNewChat} className="new-chat-button">
+//                     + New Chat
+//                 </button>
+//                 <h3>Past Conversations</h3>
+//                 {conversationList.length === 0 && <p className='no-chats'>No saved chats yet.</p>}
+//                 <div className="conversation-list">
+//                     {conversationList.map((conv) => (
+//                         <div
+//                             key={conv._id}
+//                             onClick={() => fetchMessages(conv._id)}
+//                             className={`conversation-item ${conv._id === conversationId ? 'active' : ''}`}
+//                         >
+//                             <p className="title">{conv.title}</p>
+//                             <p className="date">{formatChatDate(conv.updatedAt)}</p>
+//                         </div>
+//                     ))}
+//                 </div>
 //             </div>
 //         )}
-//         {history.map((message, index) => (
-//           <div 
-//             key={index} 
-//             className={`message-bubble ${message.sender}`}
-//           >
-//             <strong>{message.sender === 'user' ? (isAuthenticated ? `${user.username}:` : 'You:') : 'Anime Companion:'}</strong>
-//             <p>{message.text}</p>
-//           </div>
-//         ))}
 
-//         {isLoading && (
-//           <div className="message-bubble model loading">
-//             <p>Anime Companion is thinking...</p>
-//           </div>
-//         )}
-//         <div ref={messagesEndRef} />
-//       </div>
+//         {/* Main Chat Area */}
+//         <div className="chat-container">
+//             <div className="chat-messages">
+//                 {!isAuthenticated && (
+//                     <div className="initial-message">
+//                          Login or Sign Up to unlock history and personalized recommendations.
+//                     </div>
+//                 )}
+//                 {isAuthenticated && history.length === 0 && (
+//                     <div className="initial-message">
+//                         Welcome, {user.username}! Start a new chat or select one from the sidebar.
+//                     </div>
+//                 )}
+                
+//                 {isHistoryLoading ? (
+//                     <div className="loading-indicator">Loading messages...</div>
+//                 ) : (
+//                     history.map((message, index) => (
+//                         <div 
+//                             key={index} 
+//                             className={`message-bubble ${message.sender}`}
+//                         >
+//                             <strong>{message.sender === 'user' ? (isAuthenticated ? `${user.username}:` : 'You:') : 'Anime Companion:'}</strong>
+//                             <p>{message.text}</p>
+//                         </div>
+//                     ))
+//                 )}
 
-//       <form onSubmit={handleSend} className="chat-input-form">
-//         <input
-//           type="text"
-//           value={input}
-//           onChange={(e) => setInput(e.target.value)}
-//           placeholder={isLoading ? "Waiting for response..." : "Ask your question..."}
-//           disabled={isLoading}
-//         />
-//         <button type="submit" disabled={isLoading}>
-//           {isLoading ? '⏳' : 'Send'}
-//         </button>
-//       </form>
+//                 {isLoading && (
+//                     <div className="message-bubble model loading">
+//                         <p>Anime Companion is thinking...</p>
+//                     </div>
+//                 )}
+//                 <div ref={messagesEndRef} />
+//             </div>
+
+//             <form onSubmit={handleSend} className="chat-input-form">
+//                 <input
+//                     type="text"
+//                     value={input}
+//                     onChange={(e) => setInput(e.target.value)}
+//                     placeholder={isLoading ? "Waiting for response..." : "Ask your question..."}
+//                     disabled={isLoading}
+//                 />
+//                 <button type="submit" disabled={isLoading}>
+//                     {isLoading ? '⏳' : 'Send'}
+//                 </button>
+//             </form>
+//         </div>
 //     </div>
 //   );
 // }
 
 // export default ChatWindow;
-// frontend/src/components/ChatWindow.jsx
-import React, { useState, useRef, useEffect } from 'react';
+
+
+// frontend/src/components/ChatWindow.jsx (FINAL, CORRECTED VERSION)
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext'; 
-import Cookies from 'js-cookie'; // <--- Import Cookies to persist chat ID
+import Cookies from 'js-cookie'; 
 import './ChatWindow.css'; 
 
 const API_BASE_URL = 'http://localhost:3001/api/ai';
 
+// Helper function to format date
+const formatChatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+        month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+    });
+};
+
+
 function ChatWindow() {
-  const { token, user, isAuthenticated } = useAuth(); 
+  const { user, isAuthenticated } = useAuth(); // Removed 'token'
   
   const [history, setHistory] = useState([]); 
   const [conversationId, setConversationId] = useState(null); 
+  const [conversationList, setConversationList] = useState([]); 
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isHistoryLoading, setIsHistoryLoading] = useState(true); // <--- NEW STATE for initial load
+  const [isHistoryLoading, setIsHistoryLoading] = useState(false); 
+  const [isListLoading, setIsListLoading] = useState(true); 
 
   const messagesEndRef = useRef(null);
 
-  // --- 1. HISTORY LOADING HOOK ---
+  // --- Core function to fetch history for a specific ID ---
+  const fetchMessages = useCallback(async (id) => {
+      if (!id || !isAuthenticated) return;
+      
+      setIsHistoryLoading(true);
+      Cookies.set('last-conversation-id', id, { expires: 7, secure: false, sameSite: 'Lax' });
+      
+      try {
+          // Rely on global axios.withCredentials for cookie sending
+          const config = { headers: {} }; 
+          
+          const response = await axios.get(`${API_BASE_URL}/conversations/${id}`, config);
+          
+          setHistory(response.data.messages);
+          setConversationId(response.data.conversationId);
+          
+      } catch (error) {
+          console.error("Error fetching specific conversation:", error.response?.data || error.message);
+          Cookies.remove('last-conversation-id');
+          setConversationId(null);
+          setHistory([]);
+      } finally {
+          setIsHistoryLoading(false);
+      }
+  }, [isAuthenticated]); 
+
+
+  // --- 1. CONVERSATION LIST HOOK (Loads all chat summaries on login) ---
   useEffect(() => {
-    const loadHistory = async () => {
-        // Stop if not authenticated or if history is already loaded
-        if (!isAuthenticated) {
-            setIsHistoryLoading(false);
-            return;
-        }
+    if (!isAuthenticated) {
+        setConversationList([]);
+        setIsListLoading(false);
+        return;
+    }
 
-        const lastConversationId = Cookies.get('last-conversation-id');
-        
-        if (!lastConversationId) {
-            setIsHistoryLoading(false);
-            return;
-        }
-
+    const loadConversationList = async () => {
+        setIsListLoading(true);
         try {
-            const config = {
-                headers: {
-                    'Authorization': `Bearer ${token}`, 
-                }
-            };
-            // Fetch history using the new GET route
-            const response = await axios.get(`${API_BASE_URL}/history/${lastConversationId}`, config);
+            // Rely on global axios.withCredentials for cookie sending
+            const config = { headers: {} };
             
-            // Set history state and update conversationId
-            setHistory(response.data.messages);
-            setConversationId(response.data.conversationId);
-            console.log(`History loaded for conversation: ${response.data.conversationId}`);
+            const response = await axios.get(`${API_BASE_URL}/conversations`, config); 
+            
+            setConversationList(response.data);
+            
+            // Auto-load the most recent chat or the one saved in the cookie
+            const lastId = Cookies.get('last-conversation-id');
+            const targetId = lastId && response.data.some(c => c._id === lastId) 
+                               ? lastId
+                               : response.data[0]?._id; 
+            
+            if (targetId) {
+                fetchMessages(targetId);
+            } else {
+                setHistory([]); 
+            }
 
         } catch (error) {
-            console.error("Error loading conversation history:", error.response?.data || error.message);
-            // If fetching old history fails (e.g., ID expired/invalid), just start a new chat
-            Cookies.remove('last-conversation-id');
-            setConversationId(null); 
+            console.error("Error loading conversation list:", error.response?.data || error.message);
+            setConversationList([]);
             setHistory([]);
         } finally {
-            setIsHistoryLoading(false);
+            setIsListLoading(false);
         }
     };
-
-    // Reset and load history when the authentication status changes (login/logout)
+    
     setHistory([]);
     setConversationId(null);
-    loadHistory();
-  }, [isAuthenticated, token]); // Rerun when user logs in/out
+    loadConversationList();
+    
+  }, [isAuthenticated, fetchMessages]); 
 
-  // Scroll to the bottom whenever history changes or loading state changes
+
+  // --- New Chat Handler ---
+  const startNewChat = () => {
+      setConversationId(null);
+      setHistory([]);
+      Cookies.remove('last-conversation-id');
+  };
+  
+  // Scroll to the bottom whenever history changes
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [history, isHistoryLoading]);
   
-  // --- END HISTORY LOADING HOOK ---
-
-
-  // Handles sending the message to the backend
+  
+  // Handles sending the message to the backend 
   const handleSend = async (e) => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
-
-    const userPrompt = input.trim();
     
-    // 1. Optimistic update for user message
+    const userPrompt = input.trim();
+    // 1. Optimistic Update (Push user message TEMPORARILY)
     const newUserMessage = { sender: 'user', text: userPrompt };
     setHistory(prevHistory => [...prevHistory, newUserMessage]); 
     
@@ -326,108 +388,150 @@ function ChatWindow() {
     setIsLoading(true);
 
     try {
-      // Configure headers to include the JWT token
-      const config = {
-          headers: {
-              'Authorization': token ? `Bearer ${token}` : '', 
-              'Content-Type': 'application/json'
-          }
-      };
+      // Configuration remains correct (relying on global axios credentials)
+      const config = { 
+          headers: { 
+              'Content-Type': 'application/json' 
+          } 
+      }; 
       
-      // 2. Prepare the data payload
-      const payload = {
-        userPrompt: userPrompt,
-        conversationId: conversationId, // <--- SEND CURRENT ID
-      };
+      const payload = { userPrompt: userPrompt, conversationId: conversationId };
 
-      // 3. Make the API call to your Express backend
-      const response = await axios.post(`${API_BASE_URL}/chat`, payload, config); // <--- Use /chat endpoint
+      const response = await axios.post(`${API_BASE_URL}/chat`, payload, config);
+      
+      const aiResponseText = response.data.text;
 
-      // 4. Update the conversation ID in state AND save to cookie for persistence
       if (response.data.conversationId) {
-          setConversationId(response.data.conversationId);
-          Cookies.set('last-conversation-id', response.data.conversationId, { expires: 7, secure: false, sameSite: 'Lax' });
+          const newId = response.data.conversationId;
+          setConversationId(newId);
+          Cookies.set('last-conversation-id', newId, { expires: 7, secure: false, sameSite: 'Lax' });
+          
+          if (!conversationId) {
+             const listResponse = await axios.get(`${API_BASE_URL}/conversations`, {headers: {}}); 
+             setConversationList(listResponse.data);
+          }
       }
 
-      // 5. Add AI response to history
-      const aiMessage = { 
-        sender: 'model', 
-        text: response.data.text 
-      };
+      const finalAIMessage = { sender: 'model', text: aiResponseText };
       
-      setHistory(prevHistory => [...prevHistory, aiMessage]);
+      // CRITICAL FIX: Synchronize state by removing the temporary message and adding the final turn.
+      if (finalAIMessage.text && finalAIMessage.text.length > 0) {
+        setHistory(prevHistory => {
+            // Remove the temporary user message added optimistically (the last element)
+            const updatedHistory = prevHistory.slice(0, -1); 
+            
+            // Add the final user message (as recorded by the server)
+            updatedHistory.push(newUserMessage);
+            // Add the final AI response
+            updatedHistory.push(finalAIMessage);
+
+            return updatedHistory;
+        });
+      } else {
+        // Fallback for an empty response (remove user message and reset)
+        setHistory(prevHistory => prevHistory.slice(0, -1));
+        console.warn("Received empty text response from backend, ignoring message.");
+      }
+
 
     } catch (error) {
       console.error("Error fetching AI response:", error.response?.data || error.message);
-      const errorMessage = { 
-        sender: 'model', 
-        text: `Error: Sorry, the Anime Companion is currently unavailable. Status: ${error.response?.status || 'Network Error'}` 
-      };
+      const errorMessage = { sender: 'model', text: `Error: Sorry, the Anime Companion is currently unavailable. Status: ${error.response?.status || 'Network Error'}` };
       
-      // Remove the optimistic user message and append error
       setHistory(prevHistory => {
           const updatedHistory = [...prevHistory];
           updatedHistory.pop(); 
           updatedHistory.push(errorMessage);
           return updatedHistory;
       });
-
     } finally {
       setIsLoading(false);
     }
   };
-  
-  // Display loading state while trying to fetch past messages
-  if (isHistoryLoading) {
+
+
+  if (isListLoading) {
       return (
           <div className="chat-container loading-state">
-              <p>Loading conversation history... 🍥</p>
+              <p>Loading your chat history... 🍥</p>
           </div>
       );
   }
 
   return (
-    <div className="chat-container">
-      <div className="chat-messages">
-        {history.length === 0 && (
-            <div className="initial-message">
-                Welcome! {isAuthenticated ? 
-                    `Logged in as ${user.username}. Let's chat! (ID: ${conversationId ? 'Active' : 'New'})` 
-                    : 
-                    'Login or Sign Up to unlock history and personalized recommendations.'
-                }
+    <div className="main-chat-layout">
+        {/* Sidebar for History List (Only visible if authenticated) */}
+        {isAuthenticated && (
+            <div className="chat-sidebar">
+                <button onClick={startNewChat} className="new-chat-button">
+                    + New Chat
+                </button>
+                <h3>Past Conversations</h3>
+                {conversationList.length === 0 && <p className='no-chats'>No saved chats yet.</p>}
+                <div className="conversation-list">
+                    {conversationList.map((conv) => (
+                        <div
+                            key={conv._id}
+                            onClick={() => fetchMessages(conv._id)}
+                            className={`conversation-item ${conv._id === conversationId ? 'active' : ''}`}
+                        >
+                            <p className="title">{conv.title}</p>
+                            <p className="date">{formatChatDate(conv.updatedAt)}</p>
+                        </div>
+                    ))}
+                </div>
             </div>
         )}
-        {history.map((message, index) => (
-          <div 
-            key={index} 
-            className={`message-bubble ${message.sender}`}
-          >
-            <strong>{message.sender === 'user' ? (isAuthenticated ? `${user.username}:` : 'You:') : 'Anime Companion:'}</strong>
-            <p>{message.text}</p>
-          </div>
-        ))}
 
-        {isLoading && (
-          <div className="message-bubble model loading">
-            <p>Anime Companion is thinking...</p>
-          </div>
-        )}
-        <div ref={messagesEndRef} />
-      </div>
+        {/* Main Chat Area */}
+        <div className="chat-container">
+            <div className="chat-messages">
+                {!isAuthenticated && (
+                    <div className="initial-message">
+                         Login or Sign Up to unlock history and personalized recommendations.
+                    </div>
+                )}
+                {isAuthenticated && history.length === 0 && (
+                    <div className="initial-message">
+                        Welcome, {user.username}! Start a new chat or select one from the sidebar.
+                    </div>
+                )}
+                
+                {isHistoryLoading ? (
+                    <div className="loading-indicator">Loading messages...</div>
+                ) : (
+                    history.map((message, index) => (
+                        <div 
+                            key={index} 
+                            className={`message-bubble ${message.sender}`}
+                        >
+                            <strong>{message.sender === 'user' ? (isAuthenticated ? `${user.username}:` : 'You:') : 'Anime Companion:'}</strong>
+                            <p>{message.text}</p>
+                        </div>
+                    ))
+                )}
 
-      <form onSubmit={handleSend} className="chat-input-form">
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder={isLoading ? "Waiting for response..." : "Ask your question..."}
-          disabled={isLoading}
-        />
-        <button type="submit" disabled={isLoading}>
-          {isLoading ? '⏳' : 'Send'}
-        </button>
-      </form>
+                {isLoading && (
+                    <div className="message-bubble model loading">
+                        <p>Anime Companion is thinking...</p>
+                    </div>
+                )}
+                <div ref={messagesEndRef} />
+            </div>
+
+            <form onSubmit={handleSend} className="chat-input-form">
+                <input
+                    type="text"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    placeholder={isLoading ? "Waiting for response..." : "Ask your question..."}
+                    disabled={isLoading}
+                />
+                <button type="submit" disabled={isLoading}>
+                    {isLoading ? '⏳' : 'Send'}
+                </button>
+            </form>
+        </div>
     </div>
   );
 }
