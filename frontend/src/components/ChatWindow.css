@@ -1,16 +1,124 @@
-/* frontend/src/components/ChatWindow.css */
+/* frontend/src/components/ChatWindow.css (UPDATED) */
 
-.chat-container {
+/* ------------------------------------------- */
+/* 1. GLOBAL LAYOUT (Two-Column Structure)     */
+/* ------------------------------------------- */
+
+/* The outer container that holds the sidebar and the main chat */
+.main-chat-layout {
     display: flex;
-    flex-direction: column;
-    height: 80vh; /* Adjust as needed */
-    max-width: 700px;
+    /* Limit max width of the entire chat experience */
+    max-width: 1000px; 
+    width: 100%;
     margin: 20px auto;
     border: 2px solid #ccc; /* Anime style border */
     border-radius: 10px;
     overflow: hidden;
-    background-color: #f9f9f9;
+    background-color: #333; /* Darker background for the whole unit */
 }
+
+/* ------------------------------------------- */
+/* 2. SIDEBAR STYLES (History List)            */
+/* ------------------------------------------- */
+.chat-sidebar {
+    /* Fixed width for the sidebar */
+    width: 250px; 
+    background-color: #2c2c2c; /* Dark background for sidebar */
+    border-right: 1px solid #444;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    color: #f1f1f1;
+}
+
+.chat-sidebar h3 {
+    margin-top: 20px;
+    margin-bottom: 10px;
+    font-size: 1.1em;
+    color: #f44336; /* Use your anime red accent */
+}
+
+.new-chat-button {
+    background-color: #4CAF50; /* Use your user/hero color */
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.new-chat-button:hover {
+    background-color: #45a049;
+}
+
+.conversation-list {
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+.conversation-item {
+    padding: 10px;
+    margin-bottom: 5px;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #3e3e3e;
+    border-left: 3px solid transparent;
+    transition: all 0.2s;
+}
+
+.conversation-item:hover {
+    background-color: #4a4a4a;
+}
+
+.conversation-item.active {
+    background-color: #3f51b5; /* Use your model/AI color for active chat */
+    border-left-color: #f44336; /* Accent color */
+}
+
+.conversation-item .title {
+    font-weight: bold;
+    font-size: 0.9em;
+    margin-bottom: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.conversation-item .date {
+    font-size: 0.75em;
+    color: #aaa;
+}
+
+.no-chats {
+    font-style: italic;
+    color: #999;
+    padding: 10px;
+}
+
+
+/* ------------------------------------------- */
+/* 3. MAIN CHAT CONTAINER (Right Side)         */
+/* ------------------------------------------- */
+
+/* The chat-container now acts as the right column, taking up the remaining space */
+.chat-container {
+    flex-grow: 1; 
+    display: flex;
+    flex-direction: column;
+    height: 79.5vh; /* Keep relative height, slightly adjusted for border */
+    max-width: none; /* Remove max-width restriction here */
+    margin: 0; /* Remove margin from individual container */
+    border: none;
+    border-radius: 0;
+    background-color: #f9f9f9; /* Retain your light background */
+}
+
+
+/* ------------------------------------------- */
+/* 4. CHAT MESSAGE & INPUT STYLES (Retained)   */
+/* ------------------------------------------- */
 
 .chat-messages {
     flex-grow: 1;
@@ -37,13 +145,13 @@
 
 .user {
     align-self: flex-end;
-    background-color: #4CAF50; /* A green "hero" color */
+    background-color: #4CAF50; 
     color: white;
 }
 
 .model {
     align-self: flex-start;
-    background-color: #3f51b5; /* A blue "AI" color */
+    background-color: #3f51b5; 
     color: white;
 }
 
@@ -70,7 +178,7 @@
 
 .chat-input-form button {
     padding: 10px 15px;
-    background-color: #f44336; /* A contrasting anime red */
+    background-color: #f44336; 
     color: white;
     border: none;
     border-radius: 5px;
@@ -80,13 +188,4 @@
 .chat-input-form button:disabled {
     background-color: #aaa;
     cursor: not-allowed;
-}
-
-/* Optional: Add basic global styles to App.css */
-/* frontend/src/App.css */
-.app-container {
-    text-align: center;
-}
-.app-header {
-    margin-bottom: 20px;
 }
