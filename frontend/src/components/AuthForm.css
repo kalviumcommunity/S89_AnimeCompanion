@@ -1,0 +1,119 @@
+/* frontend/src/components/AuthForm.css */
+
+/* Define variables for easy theme changes */
+:root {
+    --glass-bg: rgba(255, 255, 255, 0.15); /* Light transparent background */
+    --glass-border: rgba(255, 255, 255, 0.3); /* Lighter border for definition */
+    --glass-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); /* Subtle large shadow */
+    --soft-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* Soft inner shadow */
+    --accent-blue: #007aff; /* Standard macOS blue accent */
+    --accent-red: #ff3b30; /* Standard iOS/macOS red */
+    --text-color: #f1f1f1; /* Light text for visibility against dark/blurred background */
+}
+
+.auth-container {
+    width: 100%;
+    max-width: 380px;
+    margin: 50px auto;
+    padding: 30px;
+    border-radius: 12px;
+    
+    /* --- CRITICAL GLASS EFFECT PROPERTIES --- */
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(10px); /* The frosted glass effect */
+    -webkit-backdrop-filter: blur(10px); /* Webkit vendor prefix */
+    box-shadow: var(--glass-shadow);
+    /* -------------------------------------- */
+    
+    color: var(--text-color);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+}
+
+.auth-container h3 {
+    text-align: center;
+    color: white;
+    font-weight: 600;
+    margin-bottom: 25px;
+    letter-spacing: 0.5px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5); /* Subtle depth */
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.auth-form input {
+    padding: 12px 15px;
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    font-size: 1em;
+    color: var(--text-color);
+    background-color: rgba(255, 255, 255, 0.1); /* Slightly more opaque background for input */
+    transition: border-color 0.2s, background-color 0.2s;
+}
+
+.auth-form input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.auth-form input:focus {
+    outline: none;
+    border-color: var(--accent-blue);
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.auth-form button[type="submit"] {
+    padding: 12px 15px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.05em;
+    font-weight: 600;
+    cursor: pointer;
+    
+    /* Primary Action Button (Blue) */
+    background-color: var(--accent-blue);
+    color: white;
+    
+    transition: background-color 0.2s, box-shadow 0.2s;
+    box-shadow: var(--soft-shadow);
+}
+
+.auth-form button[type="submit"]:hover {
+    background-color: #0066d9;
+}
+
+.auth-message {
+    text-align: center;
+    padding: 10px;
+    margin-top: 15px;
+    border-radius: 6px;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--text-color);
+    font-size: 0.9em;
+}
+
+.toggle-button {
+    margin-top: 15px;
+    background: none;
+    border: none;
+    color: var(--accent-blue); /* Use blue for the link/toggle action */
+    cursor: pointer;
+    font-size: 0.9em;
+    text-decoration: underline;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+
+.toggle-button:hover {
+    opacity: 1;
+}
+
+/* Ensure the background looks good in a larger context */
+body {
+    /* For testing the glass effect, a background image or gradient is helpful */
+    background: linear-gradient(135deg, #2c3e50 0%, #1F294C 100%); 
+    min-height: 100vh;
+}

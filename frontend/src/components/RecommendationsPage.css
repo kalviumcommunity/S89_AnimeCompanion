@@ -1,0 +1,102 @@
+/* frontend/src/components/RecommendationsPage.css */
+
+.recommendations-container {
+    max-width: 900px;
+    width: 100%;
+    margin: 40px auto;
+    padding: 30px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.recommendations-container h2 {
+    text-align: center;
+    color: #f44336; /* Anime Red Accent */
+    margin-bottom: 10px;
+    font-size: 2em;
+}
+
+.rec-intro {
+    text-align: center;
+    color: #555;
+    margin-bottom: 30px;
+    font-style: italic;
+}
+
+/* --- Status Messages/Loading --- */
+.rec-status-container {
+    padding: 30px;
+    text-align: center;
+    border: 1px dashed #3f51b5;
+    border-radius: 8px;
+    margin-top: 20px;
+    color: #3f51b5;
+    font-weight: 500;
+}
+
+.rec-status-container.error {
+    color: #f44336;
+    border-color: #f44336;
+    background-color: #ffe6e6;
+}
+
+/* ------------------------------------------- */
+/* RECOMMENDATIONS GRID & CARDS */
+/* ------------------------------------------- */
+
+.recommendations-grid {
+    display: grid;
+    /* Display 2 columns on larger screens */
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); 
+    gap: 25px;
+    padding-top: 20px;
+}
+
+.recommendation-card {
+    background-color: #fafafa;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    overflow: hidden;
+}
+
+.recommendation-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.card-rank {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #3f51b5; /* Model/AI Blue */
+    color: white;
+    font-size: 1.1em;
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.recommendation-card h3 {
+    color: #333;
+    font-size: 1.4em;
+    margin-top: 0;
+    margin-bottom: 10px;
+    line-height: 1.2;
+}
+
+.card-reason {
+    color: #666;
+    font-size: 1em;
+    line-height: 1.5;
+    margin: 0;
+    border-top: 1px dashed #eee;
+    padding-top: 10px;
+    margin-top: 10px;
+}
