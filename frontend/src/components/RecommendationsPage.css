@@ -1,45 +1,52 @@
-/* frontend/src/components/RecommendationsPage.css */
+/* frontend/src/components/RecommendationsPage.css (FINAL READABILITY & GLASS EFFECT) */
 
 .recommendations-container {
     max-width: 900px;
-    width: 100%;
-    margin: 40px auto;
+    width: 95%; 
+    margin: 30px auto; 
     padding: 30px;
-    background-color: #ffffff;
-    border-radius: 10px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    
+    /* --- GLASS EFFECT on OUTER CONTAINER (This is where the blur happens) --- */
+    background-color: rgba(255, 255, 255, 0.15); /* Keep this translucent */
+    backdrop-filter: blur(8px) saturate(180%); 
+    -webkit-backdrop-filter: blur(8px) saturate(180%);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2); 
+    /* ---------------------------------------------------------------------- */
+    
+    border-radius: 15px; 
+    overflow-y: auto; 
+    height: auto;
+    max-height: 80vh; 
+
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    color: white; /* Ensure default text in container is white (e.g., Rec intro) */
 }
 
 .recommendations-container h2 {
     text-align: center;
-    color: #f44336; /* Anime Red Accent */
+    color: #ff3b30; 
     margin-bottom: 10px;
-    font-size: 2em;
+    font-size: 2.2em;
+    font-weight: 800;
 }
 
 .rec-intro {
     text-align: center;
-    color: #555;
+    color: rgba(255, 255, 255, 0.8); /* Lighter text for contrast */
     margin-bottom: 30px;
     font-style: italic;
 }
 
 /* --- Status Messages/Loading --- */
 .rec-status-container {
-    padding: 30px;
+    padding: 20px;
     text-align: center;
-    border: 1px dashed #3f51b5;
+    border: 1px dashed rgba(0, 122, 255, 0.5); 
     border-radius: 8px;
     margin-top: 20px;
-    color: #3f51b5;
-    font-weight: 500;
-}
-
-.rec-status-container.error {
-    color: #f44336;
-    border-color: #f44336;
-    background-color: #ffe6e6;
+    color: rgba(0, 122, 255, 0.9);
+    font-weight: 600;
+    background-color: rgba(255, 255, 255, 0.1); 
 }
 
 /* ------------------------------------------- */
@@ -47,56 +54,98 @@
 /* ------------------------------------------- */
 
 .recommendations-grid {
-    display: grid;
-    /* Display 2 columns on larger screens */
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); 
-    gap: 25px;
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    gap: 20px; 
     padding-top: 20px;
+    flex-shrink: 0; 
 }
 
 .recommendation-card {
-    background-color: #fafafa;
-    border: 1px solid #e0e0e0;
+    width: 100%; 
+    max-width: 750px; 
+    
+    /* --- CRITICAL FIX 2: Semi-opaque WHITE background for cards (to make text visible) --- */
+    background-color: rgba(255, 255, 255, 0.9); /* Reverted to semi-opaque white */
+    /* REMOVED: backdrop-filter and -webkit-backdrop-filter from cards directly */
+    /* The main container's backdrop-filter will blur the content *behind* these cards */
+    border: 1px solid rgba(0, 0, 0, 0.05); /* Light border to define cards */
+    /* -------------------------------------------------------------------------------- */
+    
     border-radius: 12px;
     padding: 20px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); 
     transition: transform 0.2s, box-shadow 0.2s;
     position: relative;
     overflow: hidden;
+    
+    /* CRITICAL FIX 3: Ensure card text is a readable DARK color */
+    color: #1a1a1a; 
 }
 
 .recommendation-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    transform: translateY(-3px); 
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.3);
+    background-color: #ffffff; /* Fully opaque white on hover */
 }
 
 .card-rank {
     position: absolute;
-    top: 10px;
-    right: 10px;
-    background-color: #3f51b5; /* Model/AI Blue */
+    top: 0; 
+    right: 0; 
+    background-color: #007aff; 
     color: white;
-    font-size: 1.1em;
-    font-weight: bold;
-    padding: 5px 10px;
-    border-radius: 6px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    font-size: 1em;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 0 12px 0 12px; 
+    box-shadow: -2px 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .recommendation-card h3 {
-    color: #333;
-    font-size: 1.4em;
+    color: #1a1a1a; /* Dark heading for readability */
+    font-size: 1.3em;
     margin-top: 0;
     margin-bottom: 10px;
     line-height: 1.2;
 }
 
 .card-reason {
-    color: #666;
-    font-size: 1em;
+    color: #444; /* Dark gray for readability */
+    font-size: 0.95em;
     line-height: 1.5;
     margin: 0;
-    border-top: 1px dashed #eee;
+    border-top: 1px solid #f0f0f0; /* Light divider */
     padding-top: 10px;
     margin-top: 10px;
+}
+
+/* ------------------------------------------- */
+/* MEDIA QUERIES (Mobile Adjustments)    */
+/* ------------------------------------------- */
+
+@media (max-width: 500px) {
+    .recommendations-container {
+        width: 100%; 
+        margin: 10px 0;
+        padding: 15px; 
+        border-radius: 0; 
+        box-shadow: none;
+        max-height: 95vh; 
+        background-color: rgba(255, 255, 255, 0.1); 
+    }
+
+    .recommendations-container h2 {
+        font-size: 1.8em;
+    }
+
+    .recommendations-grid {
+        gap: 15px;
+    }
+    
+    .recommendation-card {
+        padding: 15px;
+        background-color: rgba(255, 255, 255, 0.95); /* Keep semi-opaque on mobile for text */
+    }
 }

@@ -1,189 +1,272 @@
-
-/* frontend/src/components/ChatWindow.css (UPDATED) */
+/* frontend/src/components/ChatWindow.css (FINAL STABLE CSS) */
 
 /* ------------------------------------------- */
-/* 1. GLOBAL LAYOUT (Two-Column Structure)     */
+/* 1. GLOBAL LAYOUT (Fixed Height & Alignment) */
 /* ------------------------------------------- */
 
-/* The outer container that holds the sidebar and the main chat */
 .main-chat-layout {
     display: flex;
-    /* Limit max width of the entire chat experience */
+    /* CRITICAL FIX 1: Ensures children (sidebar and chat-container) stretch to fill height */
+    align-items: stretch; 
+    
     max-width: 1000px; 
-    width: 100%;
+    width: 95%;
     margin: 20px auto;
-    border: 2px solid #ccc; /* Anime style border */
-    border-radius: 10px;
+    
+    /* --- GLASS EFFECT APPLICATION --- */
+    background-color: rgba(255, 255, 255, 0.15); 
+    backdrop-filter: blur(20px) saturate(180%); 
+    -webkit-backdrop-filter: blur(20px) saturate(180%); 
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.3); 
+    /* -------------------------------- */
+    
+    border-radius: 15px; 
     overflow: hidden;
-    background-color: #333; /* Darker background for the whole unit */
+    /* CRITICAL FIX 2: Set a fixed maximum height that works with your global layout */
+    height: calc(100vh - 150px); 
+    min-height: 550px; 
 }
 
 /* ------------------------------------------- */
-/* 2. SIDEBAR STYLES (History List)            */
+/* 2. SIDEBAR STYLES (History List - SCROLL FIX) */
 /* ------------------------------------------- */
 .chat-sidebar {
-    /* Fixed width for the sidebar */
     width: 250px; 
-    background-color: #2c2c2c; /* Dark background for sidebar */
-    border-right: 1px solid #444;
-    padding: 15px;
+    background-color: rgba(255, 255, 255, 0.95); 
+    border-right: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 5px;
     display: flex;
     flex-direction: column;
-    color: #f1f1f1;
+    color: #333; 
+    /* CRITICAL FIX 3: Ensures sidebar fills the entire vertical space */
+    height: 100%; 
+    flex-shrink: 0;
 }
 
 .chat-sidebar h3 {
-    margin-top: 20px;
+    margin-top: 5px; 
     margin-bottom: 10px;
     font-size: 1.1em;
-    color: #f44336; /* Use your anime red accent */
+    color: #ff3b30; 
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 5px;
+    /* CRITICAL FIX 4: Prevents heading from being scrollable */
+    flex-shrink: 0; 
 }
 
 .new-chat-button {
-    background-color: #4CAF50; /* Use your user/hero color */
+    width: 100%;
+    background: linear-gradient(180deg, #34c759, #2ecc71); 
     color: white;
     padding: 10px;
     border: none;
-    border-radius: 5px;
+    border-radius: 8px;
     cursor: pointer;
     font-weight: bold;
-    transition: background-color 0.2s;
+    transition: background 0.2s, transform 0.1s;
+    margin-bottom: 15px;
+    /* CRITICAL FIX 5: Prevents button from being scrollable */
+    flex-shrink: 0; 
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 .new-chat-button:hover {
-    background-color: #45a049;
+    background: linear-gradient(180deg, #2ecc71, #34c759);
+    transform: translateY(-1px);
+}
+
+/* --- NEW SCROLLABLE WRAPPER (Structural Fix) --- */
+.conversation-list-wrapper {
+    flex-grow: 1;
+    overflow-y: auto; 
+    min-height: 0; /* Ensures Flexbox works */
 }
 
 .conversation-list {
-    flex-grow: 1;
-    overflow-y: auto;
+    /* The inner list is now just a container for the items */
+    display: block; 
+    padding: 0; 
 }
+/* --- END NEW SCROLLABLE WRAPPER STYLES --- */
+
 
 .conversation-item {
     padding: 10px;
-    margin-bottom: 5px;
-    border-radius: 5px;
+    margin-bottom: 6px;
+    border-radius: 8px;
     cursor: pointer;
-    background-color: #3e3e3e;
+    background: rgba(0, 0, 0, 0.05); 
     border-left: 3px solid transparent;
-    transition: all 0.2s;
+    transition: all 0.25s ease;
+    position: relative;
+    color: #333;
+    display: flex; 
+    justify-content: space-between;
+    align-items: center;
 }
 
 .conversation-item:hover {
-    background-color: #4a4a4a;
+    background: rgba(0, 0, 0, 0.1);
 }
 
 .conversation-item.active {
-    background-color: #3f51b5; /* Use your model/AI color for active chat */
-    border-left-color: #f44336; /* Accent color */
+    background: linear-gradient(135deg, #007aff, #005fcc); 
+    border-left-color: #ff3b30; 
+    color: white; 
 }
 
 .conversation-item .title {
-    font-weight: bold;
+    font-weight: 600;
     font-size: 0.9em;
-    margin-bottom: 3px;
+    margin: 0;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    flex-grow: 1;
 }
 
-.conversation-item .date {
+.conversation-item .chat-date {
     font-size: 0.75em;
-    color: #aaa;
+    color: #888; 
+    flex-shrink: 0;
+}
+.conversation-item.active .chat-date {
+    color: #fff;
 }
 
-.no-chats {
-    font-style: italic;
-    color: #999;
-    padding: 10px;
+/* --- DELETE BUTTON (Text on Hover) --- */
+.delete-button {
+    background: none;
+    border: none;
+    color: #ff3b30; 
+    font-size: 0.85em;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0 5px;
+    transition: all 0.2s ease;
+    visibility: hidden;
+    width: 0; 
+    opacity: 0; 
+    flex-shrink: 0;
+}
+
+.conversation-item:hover .delete-button {
+    visibility: visible;
+    width: auto; 
+    opacity: 1;
+    margin-left: 10px; 
 }
 
 
 /* ------------------------------------------- */
-/* 3. MAIN CHAT CONTAINER (Right Side)         */
+/* 3. MAIN CHAT CONTAINER (Right Side - Messages Scroll) */
 /* ------------------------------------------- */
 
-/* The chat-container now acts as the right column, taking up the remaining space */
 .chat-container {
     flex-grow: 1; 
     display: flex;
     flex-direction: column;
-    height: 79.5vh; /* Keep relative height, slightly adjusted for border */
-    max-width: none; /* Remove max-width restriction here */
-    margin: 0; /* Remove margin from individual container */
-    border: none;
+    /* Must fill 100% of the parent fixed height */
+    height: 100%; 
+    background-color: white; 
+    padding: 0; 
+    max-width: none; 
+    margin: 0; 
     border-radius: 0;
-    background-color: #f9f9f9; /* Retain your light background */
 }
-
-
-/* ------------------------------------------- */
-/* 4. CHAT MESSAGE & INPUT STYLES (Retained)   */
-/* ------------------------------------------- */
 
 .chat-messages {
     flex-grow: 1;
     padding: 15px;
-    overflow-y: auto;
+    /* This is the element that MUST scroll */
+    overflow-y: auto; 
+    
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
 }
 
-.initial-message {
-    text-align: center;
-    color: #888;
-    margin-top: 20px;
-}
+/* ------------------------------------------- */
+/* 4. CHAT MESSAGE & INPUT STYLES (Readability Fix) */
+/* ------------------------------------------- */
 
 .message-bubble {
-    padding: 10px;
-    border-radius: 8px;
+    padding: 12px 15px; 
     max-width: 80%;
-    line-height: 1.4;
+    line-height: 1.45;
     word-wrap: break-word;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .user {
     align-self: flex-end;
-    background-color: #4CAF50; 
+    background: linear-gradient(135deg, #34c759, #2ecc71); 
     color: white;
+    border-radius: 15px 15px 0 15px; 
 }
 
 .model {
     align-self: flex-start;
-    background-color: #3f51b5; 
+    background: linear-gradient(135deg, #0a84ff, #007aff); 
     color: white;
+    border-radius: 15px 15px 15px 0; 
 }
 
 .model strong, .user strong {
     display: block;
     margin-bottom: 3px;
-    font-size: 0.9em;
+    font-size: 0.9em; 
+    font-weight: 700;
 }
 
+/* --- MARKDOWN VISUALIZATION STYLES --- */
+.message-bubble.model p,
+.message-bubble.model ul,
+.message-bubble.model ol,
+.message-bubble.model li {
+    color: white; 
+    margin: 5px 0; 
+    font-size: 1em;
+}
+
+.message-bubble.model h3 {
+    color: #ff3b30; 
+    font-size: 1.1em;
+    font-weight: 700;
+    margin-top: 10px;
+    margin-bottom: 5px;
+    padding-bottom: 2px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.4); 
+}
+
+/* --- INPUT FORM --- */
 .chat-input-form {
     display: flex;
-    padding: 10px;
+    padding: 15px; 
     border-top: 1px solid #ccc;
     background-color: white;
+    flex-shrink: 0; 
 }
 
 .chat-input-form input {
     flex-grow: 1;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 25px; 
     margin-right: 10px;
+    font-size: 1em;
 }
 
 .chat-input-form button {
-    padding: 10px 15px;
-    background-color: #f44336; 
+    padding: 10px 20px;
+    background-color: #ff3b30; 
     color: white;
     border: none;
-    border-radius: 5px;
+    border-radius: 25px;
     cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s;
 }
 
 .chat-input-form button:disabled {
