@@ -8,7 +8,7 @@ import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';       
 import './ChatWindow.css'; 
 
-const API_BASE_URL = 'http://localhost:3001/api/ai';
+const API_BASE_URL = 'https://tsd-animecompanion.onrender.com/api/ai';
 
 // Helper function to format date for the sidebar
 const formatChatDate = (dateString) => {

@@ -4,7 +4,7 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import './AuthForm.css';
 
-const API_BASE_URL = 'http://localhost:3001/api/users';
+const API_BASE_URL = 'https://tsd-animecompanion.onrender.com/api/users';
 
 function AuthForm() {
     const [isLogin, setIsLogin] = useState(true);
