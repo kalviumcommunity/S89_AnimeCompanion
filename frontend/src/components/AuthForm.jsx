@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import './AuthForm.css';
 
 const API_BASE_URL = 'http://localhost:3001/api/users';
 
