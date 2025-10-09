@@ -1,0 +1,15 @@
+[build]
+  # 1. Base Directory (where the package.json is located)
+  base    = "frontend"
+  
+  # 2. Build Command (install dependencies and run the build script)
+  command = "npm install && npm run build"
+  
+  # 3. Publish Directory (the output folder, relative to the base directory)
+  publish = "frontend/build" 
+
+  # NOTE: If your Base Directory is "frontend", the Publish path must include "frontend"
+  # because the setting is evaluated relative to the repository root.
+  
+  # If the setting doesn't work with "frontend/build", try just the output folder:
+  # publish = "build"
