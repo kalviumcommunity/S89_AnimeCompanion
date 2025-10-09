@@ -4,7 +4,7 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import './RecommendationsPage.css'; // Styling file
 
-const API_REC_URL = 'http://localhost:3001/api/ai/recommendations-page';
+const API_REC_URL = 'https://tsd-animecompanion.onrender.com/api/ai/recommendations-page';
 
 function RecommendationsPage() {
     const { isAuthenticated } = useAuth();
