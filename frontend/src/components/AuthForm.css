@@ -1,19 +1,29 @@
-/* frontend/src/components/AuthForm.css */
+/* frontend/src/components/AuthForm.css (FINAL RESPONSIVE GLASS) */
 
 /* Define variables for easy theme changes */
 :root {
-    --glass-bg: rgba(255, 255, 255, 0.15); /* Light transparent background */
-    --glass-border: rgba(255, 255, 255, 0.3); /* Lighter border for definition */
-    --glass-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); /* Subtle large shadow */
-    --soft-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* Soft inner shadow */
-    --accent-blue: #007aff; /* Standard macOS blue accent */
-    --accent-red: #ff3b30; /* Standard iOS/macOS red */
-    --text-color: #f1f1f1; /* Light text for visibility against dark/blurred background */
+    --glass-bg: rgba(255, 255, 255, 0.2); 
+    --glass-border: rgba(255, 255, 255, 0.4); 
+    --glass-shadow: 0 6px 40px rgba(0, 0, 0, 0.3); 
+    --soft-shadow: 0 1px 3px rgba(0, 0, 0, 0.2); 
+    --accent-blue: #007aff; 
+    --accent-red: #ff3b30; 
+    --text-color: #f1f1f1; 
+}
+
+/* Ensure the background looks good in a larger context */
+/* This is the part that removes the white background from the page outside the form */
+body {
+    background: linear-gradient(135deg, #2c3e50 0%, #1F294C 100%); 
+    min-height: 100vh;
 }
 
 .auth-container {
-    width: 100%;
-    max-width: 380px;
+    /* CRITICAL FIX 1: Max-width handles large screens, width handles small screens */
+    width: 90%; 
+    max-width: 380px; /* Limits the size on desktop */
+    /* -------------------------------------------------------------------------- */
+    
     margin: 50px auto;
     padding: 30px;
     border-radius: 12px;
@@ -21,8 +31,8 @@
     /* --- CRITICAL GLASS EFFECT PROPERTIES --- */
     background: var(--glass-bg);
     border: 1px solid var(--glass-border);
-    backdrop-filter: blur(10px); /* The frosted glass effect */
-    -webkit-backdrop-filter: blur(10px); /* Webkit vendor prefix */
+    backdrop-filter: blur(15px) saturate(150%); /* Increased blur/saturation for pop */
+    -webkit-backdrop-filter: blur(15px) saturate(150%);
     box-shadow: var(--glass-shadow);
     /* -------------------------------------- */
     
@@ -33,10 +43,10 @@
 .auth-container h3 {
     text-align: center;
     color: white;
-    font-weight: 600;
+    font-weight: 700; 
     margin-bottom: 25px;
     letter-spacing: 0.5px;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5); /* Subtle depth */
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6); 
 }
 
 .auth-form {
@@ -46,23 +56,29 @@
 }
 
 .auth-form input {
+    /* CRITICAL FIX 2: Ensure padding is slightly reduced on small screens */
     padding: 12px 15px;
-    border: 1px solid var(--glass-border);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 8px;
     font-size: 1em;
     color: var(--text-color);
-    background-color: rgba(255, 255, 255, 0.1); /* Slightly more opaque background for input */
-    transition: border-color 0.2s, background-color 0.2s;
+    /* Translucent dark background for inputs on the glass */
+    background-color: rgba(0, 0, 0, 0.1); 
+    transition: border-color 0.2s, background-color 0.2s, box-shadow 0.2s;
+    /* Ensure inputs are full width of the container */
+    width: 100%;
+    box-sizing: border-box; 
 }
 
 .auth-form input::placeholder {
-    color: rgba(255, 255, 255, 0.5);
+    color: rgba(255, 255, 255, 0.6);
 }
 
 .auth-form input:focus {
     outline: none;
     border-color: var(--accent-blue);
-    background-color: rgba(255, 255, 255, 0.2);
+    background-color: rgba(0, 0, 0, 0.25);
+    box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.5); 
 }
 
 .auth-form button[type="submit"] {
@@ -72,17 +88,17 @@
     font-size: 1.05em;
     font-weight: 600;
     cursor: pointer;
-    
-    /* Primary Action Button (Blue) */
     background-color: var(--accent-blue);
     color: white;
-    
-    transition: background-color 0.2s, box-shadow 0.2s;
-    box-shadow: var(--soft-shadow);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
+    width: 100%; /* Ensure button is full width */
+    box-sizing: border-box;
 }
 
 .auth-form button[type="submit"]:hover {
     background-color: #0066d9;
+    transform: translateY(-1px);
 }
 
 .auth-message {
@@ -90,6 +106,7 @@
     padding: 10px;
     margin-top: 15px;
     border-radius: 6px;
+    /* Translucent background for messages */
     background-color: rgba(255, 255, 255, 0.1);
     color: var(--text-color);
     font-size: 0.9em;
@@ -99,21 +116,41 @@
     margin-top: 15px;
     background: none;
     border: none;
-    color: var(--accent-blue); /* Use blue for the link/toggle action */
+    color: var(--accent-blue);
     cursor: pointer;
     font-size: 0.9em;
-    text-decoration: underline;
+    text-decoration: none;
     opacity: 0.8;
-    transition: opacity 0.2s;
+    transition: opacity 0.2s, text-decoration 0.2s;
 }
 
 .toggle-button:hover {
     opacity: 1;
+    text-decoration: underline;
 }
 
-/* Ensure the background looks good in a larger context */
-body {
-    /* For testing the glass effect, a background image or gradient is helpful */
-    background: linear-gradient(135deg, #2c3e50 0%, #1F294C 100%); 
-    min-height: 100vh;
+/* ------------------------------------------- */
+/* MEDIA QUERIES (Mobile Adjustments) */
+/* ------------------------------------------- */
+
+@media (max-width: 450px) {
+    .auth-container {
+        /* On very small phones, use slightly less padding */
+        padding: 20px;
+        margin: 10px auto;
+        width: 95%;
+    }
+
+    .auth-container h3 {
+        font-size: 1.2em;
+    }
+    
+    .auth-form {
+        gap: 12px;
+    }
+
+    .auth-form input,
+    .auth-form button[type="submit"] {
+        padding: 10px 12px;
+    }
 }
