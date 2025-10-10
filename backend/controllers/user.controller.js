@@ -202,7 +202,6 @@
 //     }
 // };
 
-
 // backend/controllers/user.controller.js
 
 const User = require('../models/User'); 
@@ -219,6 +218,18 @@ const createToken = (id) => {
         expiresIn: '1d' 
     });
 };
+
+// --- CRITICAL COOKIE OPTIONS FOR DEPLOYMENT ---
+const cookieOptions = {
+    maxAge: 24 * 60 * 60 * 1000, // 1 day
+    httpOnly: true, 
+    path: '/',
+    // CRITICAL FIX: 'Secure: true' is required for SameSite=None
+    secure: process.env.NODE_ENV === 'production', 
+    // CRITICAL FIX: Must be 'None' for cross-site cookie transmission (Netlify to Render)
+    sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
+};
+
 
 // =================================================================
 // USER REGISTRATION (SIGNUP)
@@ -245,14 +256,8 @@ exports.signup = async (req, res) => {
 
         const token = createToken(user._id);
         
-        // 5. Set HTTP-only cookie with PATH: '/' FIX
-        res.cookie('jwt', token, { 
-            maxAge: 24 * 60 * 60 * 1000, 
-            httpOnly: true, 
-            secure: process.env.NODE_ENV === 'production', 
-            sameSite: 'Lax', 
-            path: '/', // <--- CRITICAL FIX: Ensures cookie is available to all backend paths
-        });
+        // 5. Set HTTP-only cookie using the updated options
+        res.cookie('jwt', token, cookieOptions);
 
         res.status(201).json({
             message: 'User registered successfully!',
@@ -291,14 +296,8 @@ exports.login = async (req, res) => {
 
         const token = createToken(user._id);
         
-        // 4. Set HTTP-only cookie with PATH: '/' FIX
-        res.cookie('jwt', token, { 
-            maxAge: 24 * 60 * 60 * 1000, 
-            httpOnly: true, 
-            secure: process.env.NODE_ENV === 'production', 
-            sameSite: 'Lax', 
-            path: '/', // <--- CRITICAL FIX: Ensures cookie is available to all backend paths
-        });
+        // 4. Set HTTP-only cookie using the updated options
+        res.cookie('jwt', token, cookieOptions);
 
         res.status(200).json({
             message: 'Login successful!',
@@ -319,12 +318,13 @@ exports.login = async (req, res) => {
 // LOGOUT - Clears the HTTP-only cookie
 // =================================================================
 exports.logout = (req, res) => {
+    // Note: Use a cleared version of cookieOptions for logout
     res.cookie('jwt', '', {
-        maxAge: 1, // Set maxAge to 1ms to clear the cookie immediately
+        maxAge: 1, 
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'Lax',
-        path: '/', // Best practice to include path when clearing
+        sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax', 
+        path: '/',
     });
     res.status(200).json({ message: 'Logged out successfully.' });
 };
@@ -333,10 +333,8 @@ exports.logout = (req, res) => {
 // UPDATE USER PROFILE & PREFERENCES (PUT /api/users/profile)
 // =================================================================
 exports.updateUserProfile = async (req, res) => {
-    // req.userId is guaranteed to be present and valid if the authMiddleware passed
     const userId = req.userId; 
     
-    // Data received from the frontend
     const { 
         favorite_genres, 
         disliked_genres, 
@@ -359,7 +357,6 @@ exports.updateUserProfile = async (req, res) => {
         }
 
         if (add_to_watch_history) {
-            // Use $push for watch history as timestamps and order are important
             updateQuery.$push = { 
                 'watch_history': {
                     anime_title: add_to_watch_history.anime_title,
@@ -375,11 +372,10 @@ exports.updateUserProfile = async (req, res) => {
         }
         
         // Handle $push check
-        if (Object.keys(updateQuery).length === 0) {
+        if (Object.keys(updateQuery).length === 0 && !updateQuery.$push) {
             return res.status(400).json({ message: 'No valid data provided for update.' });
         }
-
-
+        
         // Perform the atomic update operation
         const updatedUser = await User.findByIdAndUpdate(
             userId,
@@ -411,13 +407,10 @@ exports.updateUserProfile = async (req, res) => {
         res.status(500).json({ message: 'Server error during profile update.' });
     }
 };
+
+// =================================================================
+// DYNAMIC RECOMMENDATIONS API (Placeholder)
+// =================================================================
 exports.getDynamicRecommendations = async (req, res) => {
-    // This is the bare minimum function required to stop the crash.
-    // The full implementation will be added here later.
     return res.status(501).json({ message: "Recommendation feature is under construction." });
 };
-// =================================================================
-// DYNAMIC RECOMMENDATIONS API (Placeholder - Implementation depends on final imports)
-// =================================================================
-// NOTE: Ensure your route file (user.routes.js) also imports and uses this export.
-// exports.getDynamicRecommendations = async (req, res) => { /* ... */ };
