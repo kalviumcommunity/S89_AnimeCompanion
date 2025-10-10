@@ -58,14 +58,13 @@
 // // -----------------------------------------------------------------
 // connectDB();
 
-
-// backend/index.js (Your main server file - FIXED)
+// backend/index.js 
 
 const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const cors = require('cors');
-const cookieParser = require('cookie-parser'); // <--- CRITICAL: ADD THIS IMPORT
+const cookieParser = require('cookie-parser');
 
 const aiRoutes = require('./routes/ai.routes.js');
 const userRoutes = require('./routes/user.routes.js');
@@ -81,18 +80,38 @@ const MONGODB_URI = process.env.MONGODB_URI;
 // Middleware Setup (CRITICAL FIXES HERE)
 // -----------------------------------------------------------------
 
-// 1. **CORS Configuration:** Must allow the frontend origin and credentials (cookies).
+// ✅ 1. **CORS Configuration: ALLOWS NETLIFY DOMAIN**
+const allowedOrigins = [
+    'http://localhost:5173',                   // 1. Local Development
+    'https://tsd-animecompanion.onrender.com', // 2. Your Backend's own Render domain
+    'https://animecompanion8.netlify.app'      // 3. CRITICAL: Your Deployed Netlify Frontend URL
+];
+
+// --- Configure CORS Middleware ---
 app.use(cors({
-    origin: 'http://localhost:5173', // Must match your React development server URL
-    credentials: true,               // CRITICAL: Allows HTTP-only cookies (JWT) to be sent/received
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    origin: function (origin, callback) {
+        // Allow requests with no origin (like mobile apps, curl, or server-to-server)
+        if (!origin) return callback(null, true);
+        
+        // Check if the requested origin is in our allowed list
+        if (allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            console.log(`CORS Error: Origin ${origin} not allowed`);
+            // You can remove this error message for production if you prefer
+            callback(new Error('Not allowed by CORS'), false); 
+        }
+    },
+    credentials: true, // IMPORTANT: Allows cookies (JWT) and authorization headers
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
 }));
+
 
 // 2. **Body Parser:** Parses incoming JSON request bodies.
 app.use(express.json());
 
 // 3. **Cookie Parser:** Parses cookies attached to the request header.
-app.use(cookieParser()); // <--- CRITICAL: ADD THIS MIDDLEWARE to read req.cookies.jwt
+app.use(cookieParser());
 
 // -----------------------------------------------------------------
 // Database Connection
@@ -103,6 +122,7 @@ const connectDB = async () => {
     await mongoose.connect(MONGODB_URI);
     console.log('🔗 MongoDB connected successfully!');
 
+    // Only start server after DB connection is successful
     app.listen(PORT, () => {
       console.log(`🚀 Server running on http://localhost:${PORT}`);
     });
