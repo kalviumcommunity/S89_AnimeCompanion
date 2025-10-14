@@ -41,9 +41,10 @@ function AuthForm() {
     };
 
     return (
-        <div className="auth-container">
-            <h3>{isLogin ? 'Login to Access Personalization' : 'Sign Up for Anime Companion'}</h3>
-            <form onSubmit={handleSubmit} className="auth-form">
+        <div className="auth-page">
+            <div className="auth-container">
+                <h3>{isLogin ? 'Login to Access Personalization' : 'Sign Up for Anime Companion'}</h3>
+                <form onSubmit={handleSubmit} className="auth-form">
                 {!isLogin && (
                     <input 
                         type="text" 
@@ -69,13 +70,14 @@ function AuthForm() {
                 />
                 <button type="submit">{isLogin ? 'Login' : 'Sign Up'}</button>
             </form>
-            {message && <p className="auth-message">{message}</p>}
-            <button 
-                className="toggle-button"
-                onClick={() => setIsLogin(!isLogin)}
-            >
-                {isLogin ? 'Need an account? Sign Up' : 'Already have an account? Login'}
-            </button>
+                {message && <p className="auth-message">{message}</p>}
+                <button 
+                    className="toggle-button"
+                    onClick={() => setIsLogin(!isLogin)}
+                >
+                    {isLogin ? 'Need an account? Sign Up' : 'Already have an account? Login'}
+                </button>
+            </div>
         </div>
     );
 }
