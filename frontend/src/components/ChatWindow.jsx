@@ -7,6 +7,7 @@ import Cookies from 'js-cookie';
 import ReactMarkdown from 'react-markdown'; 
 import rehypeRaw from 'rehype-raw';       
 import './ChatWindow.css'; 
+import Sidebar from './Sidebar';
 
 const API_BASE_URL = 'https://tsd-animecompanion.onrender.com/api/ai';
 
@@ -18,8 +19,8 @@ const formatChatDate = (dateString) => {
 };
 
 
-function ChatWindow() {
-  const { user, isAuthenticated, token } = useAuth(); 
+function ChatWindow({ sidebarOpen: sidebarOpenProp = true, setSidebarOpen: setSidebarOpenProp = () => {} }) {
+    const { user, isAuthenticated, token } = useAuth(); 
   
   // Chat States
   const [history, setHistory] = useState([]); 
@@ -34,6 +35,33 @@ function ChatWindow() {
   const [hoverId, setHoverId] = useState(null); 
 
   const messagesEndRef = useRef(null);
+    const streamingTimersRef = useRef([]);
+    // use lifted sidebar state when provided
+    const [localSidebarOpen] = useState(true);
+    const sidebarOpen = typeof sidebarOpenProp === 'boolean' ? sidebarOpenProp : localSidebarOpen;
+    const setSidebarOpen = typeof setSidebarOpenProp === 'function' ? setSidebarOpenProp : () => {};
+
+    // Helper: remove spaces before punctuation so commas/periods don't float to next line
+    const sanitizeText = (text) => {
+        if (!text || typeof text !== 'string') return text;
+        // Attach punctuation to the previous word even if separated by spaces/newlines
+        // Examples handled: "word ," -> "word,"  and "word\n," -> "word,"
+        let s = text;
+        // remove spaces before punctuation
+        s = s.replace(/\s+([,.;:!?])/g, '$1');
+        // remove newlines before punctuation (and any spaces between)
+        s = s.replace(/\n+\s*([,.;:!?])/g, '$1');
+        // if punctuation starts its own line (e.g. "\n, ..."), move it back to previous line
+        s = s.replace(/\n{1,}\s*([,.;:!?])\s*/g, '$1 ');
+        // collapse multiple blank lines into maximum two
+        s = s.replace(/\n{3,}/g, '\n\n');
+        return s.trim();
+    };
+
+    const sanitizeMessages = (messages) => {
+        if (!Array.isArray(messages)) return [];
+        return messages.map(m => ({ ...m, text: typeof m.text === 'string' ? sanitizeText(m.text) : m.text }));
+    };
   
   // --- Core function to reload the sidebar list and AUTO-LOAD ---
   const loadConversationList = useCallback(async () => {
@@ -58,7 +86,7 @@ function ChatWindow() {
         
         if (targetId) {
             const historyResponse = await axios.get(`${API_BASE_URL}/conversations/${targetId}`, config);
-            setHistory(historyResponse.data.messages);
+            setHistory(sanitizeMessages(historyResponse.data.messages));
             setConversationId(targetId);
         } else {
             setHistory([]); 
@@ -78,7 +106,10 @@ function ChatWindow() {
   // --- Core function to fetch history for a specific ID (for selection) ---
   const fetchMessages = useCallback(async (id) => {
       if (!id || !isAuthenticated) return;
-      
+      // clear any streaming timers and stop existing streams before switching
+      streamingTimersRef.current.forEach(({ timer }) => clearInterval(timer));
+      streamingTimersRef.current = [];
+
       setIsHistoryLoading(true);
       Cookies.set('last-conversation-id', id, { expires: 7, secure: false, sameSite: 'Lax' });
       
@@ -86,7 +117,7 @@ function ChatWindow() {
           const config = { headers: {} }; 
           const response = await axios.get(`${API_BASE_URL}/conversations/${id}`, config);
           
-          setHistory(response.data.messages);
+          setHistory(sanitizeMessages(response.data.messages));
           setConversationId(response.data.conversationId);
           
       } catch (error) {
@@ -105,6 +136,9 @@ function ChatWindow() {
       Cookies.remove('last-conversation-id');
       setConversationId(null);
       setHistory([]);
+      // clear any streaming timers and stop active streams
+      streamingTimersRef.current.forEach(({ timer }) => clearInterval(timer));
+      streamingTimersRef.current = [];
       loadConversationList(); 
   };
 
@@ -143,6 +177,14 @@ function ChatWindow() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [history, isHistoryLoading]);
+
+    // Clean up any streaming timers on unmount
+    useEffect(() => {
+        return () => {
+                streamingTimersRef.current.forEach(({ timer }) => clearInterval(timer));
+                streamingTimersRef.current = [];
+        };
+    }, []);
   
   
   // Handles sending the message to the backend 
@@ -151,11 +193,19 @@ function ChatWindow() {
     if (!input.trim() || isLoading) return;
     
     const userPrompt = input.trim();
-    const newUserMessage = { sender: 'user', text: userPrompt };
-    setHistory(prevHistory => [...prevHistory, newUserMessage]); 
-    
-    setInput('');
-    setIsLoading(true);
+        const newUserMessage = { sender: 'user', text: userPrompt };
+        const streamId = `stream-${Date.now()}`;
+        const placeholder = { sender: 'model', text: '', _streamId: streamId };
+
+        // Append user message and placeholder in one atomic update to preserve order
+        let placeholderIndex = null;
+        setHistory(prev => {
+            const next = [...prev, newUserMessage, placeholder];
+            placeholderIndex = next.length - 1;
+            return next;
+        });
+        setInput('');
+        setIsLoading(true);
 
     try {
       const config = { headers: {} }; 
@@ -176,32 +226,62 @@ function ChatWindow() {
           }
       }
 
-      const finalAIMessage = { sender: 'model', text: aiResponseText };
-      
-      if (finalAIMessage.text && finalAIMessage.text.length > 0) {
-        setHistory(prevHistory => {
-            const updatedHistory = prevHistory.slice(0, -1); 
-            updatedHistory.push(newUserMessage);
-            updatedHistory.push(finalAIMessage);
-            return updatedHistory;
-        });
-      } else {
-        setHistory(prevHistory => prevHistory.slice(0, -1));
-        alert("Error: Received empty text response from the AI.");
-      }
+                    const finalAIMessageText = aiResponseText || '';
+
+                    // Streaming: reveal characters progressively into the existing placeholder
+                    const revealSpeed = 18; // ms per character (tune to taste)
+                    let cursor = 0;
+
+                    if (finalAIMessageText.length === 0) {
+                        // nothing to stream — replace placeholder with an error message
+                        setHistory(prev => prev.map(m => (m._streamId === streamId ? { sender: 'model', text: 'Error: Empty response from AI.' } : m)));
+                        setIsLoading(false);
+                    } else {
+                        // We captured placeholderIndex earlier; if not, find it
+                        if (placeholderIndex === null) {
+                            placeholderIndex = history.findIndex(m => m && m._streamId === streamId);
+                        }
+
+                        const timer = setInterval(() => {
+                            cursor += 1;
+                            const chunk = finalAIMessageText.slice(0, cursor);
+
+                            setHistory(prev => {
+                                // defensive: if index is invalid, fall back to mapping
+                                if (placeholderIndex == null || placeholderIndex < 0 || placeholderIndex >= prev.length) {
+                                    return prev.map(m => (m._streamId === streamId ? { ...m, text: sanitizeText(chunk) } : m));
+                                }
+                                const copy = prev.slice();
+                                copy[placeholderIndex] = { ...copy[placeholderIndex], text: sanitizeText(chunk) };
+                                return copy;
+                            });
+
+                            if (cursor >= finalAIMessageText.length) {
+                                clearInterval(timer);
+                                setHistory(prev => {
+                                    if (placeholderIndex == null || placeholderIndex < 0 || placeholderIndex >= prev.length) {
+                                        return prev.map(m => (m._streamId === streamId ? { sender: 'model', text: sanitizeText(finalAIMessageText) } : m));
+                                    }
+                                    const copy = prev.slice();
+                                    copy[placeholderIndex] = { sender: 'model', text: sanitizeText(finalAIMessageText) };
+                                    return copy;
+                                });
+                                streamingTimersRef.current = streamingTimersRef.current.filter(t => t.timer !== timer);
+                                setIsLoading(false);
+                            }
+                        }, revealSpeed);
+
+                        streamingTimersRef.current.push({ id: streamId, timer, index: placeholderIndex });
+                    }
 
     } catch (error) {
       console.error("Error fetching AI response:", error.response?.data || error.message);
       const errorMessage = { sender: 'model', text: `Error: The Companion is unavailable. Status: ${error.response?.status || 'Network Error'}` };
       
-      setHistory(prevHistory => {
-          const updatedHistory = [...prevHistory];
-          updatedHistory.pop(); 
-          updatedHistory.push(errorMessage);
-          return updatedHistory;
-      });
+                    // Replace any placeholder for this stream with the error message
+                    setHistory(prevHistory => prevHistory.map(m => (m._streamId === streamId ? errorMessage : m)));
     } finally {
-      setIsLoading(false);
+                    // nothing here; isLoading is managed by streaming completion or error paths
     }
   };
 
@@ -214,52 +294,26 @@ function ChatWindow() {
       );
   }
 
-  return (
-    <div className="main-chat-layout">
-        {/* Sidebar for History List */}
-        {isAuthenticated && (
-            <div className="chat-sidebar">
-                {/* Button is a static element at the top */}
-                <button onClick={startNewChat} className="new-chat-button">
-                    New Chat
-                </button>
-                <h3 className="sidebar-header">Past Conversations</h3> 
-                
-                {/* CRITICAL FIX: SCROLLABLE CONTAINER FOR CONVERSATION ITEMS */}
-                <div className="conversation-list-wrapper"> 
-                    {conversationList.length === 0 && <p className='no-chats'>No saved chats yet.</p>}
-                    
-                    <div className="conversation-list"> 
-                        {conversationList.map((conv) => (
-                            <div
-                                key={conv._id}
-                                onClick={() => fetchMessages(conv._id)}
-                                onMouseEnter={() => setHoverId(conv._id)}
-                                onMouseLeave={() => setHoverId(null)}
-                                className={`conversation-item ${conv._id === conversationId ? 'active' : ''}`}
-                            >
-                                <span className="chat-date">{formatChatDate(conv.updatedAt)}</span>
-                                <p className="title">{conv.title}</p>
-                                
-                                {/* Delete Button (Visible on hover as text) */}
-                                {hoverId === conv._id && (
-                                    <button 
-                                        className="delete-button text-only" 
-                                        onClick={(e) => deleteConversation(conv._id, e)} 
-                                    >
-                                        Delete
-                                    </button>
-                                )}
-                            </div>
-                        ))}
-                    </div>
-                </div> {/* End Scrollable Wrapper */}
-            </div>
-        )}
+    return (
+    <div className={`main-chat-layout modern ${sidebarOpen ? '' : 'collapsed'}`}>
+        {/* Sidebar for History List - always in DOM but may be collapsed */}
+            {isAuthenticated && (
+                <Sidebar
+                    conversationList={conversationList}
+                    fetchMessages={fetchMessages}
+                    startNewChat={startNewChat}
+                    deleteConversation={deleteConversation}
+                    conversationId={conversationId}
+                    hoverId={hoverId}
+                    setHoverId={setHoverId}
+                    sidebarOpen={sidebarOpen}
+                    setSidebarOpen={setSidebarOpen}
+                />
+            )}
 
         {/* Main Chat Area */}
-        <div className="chat-container">
-            <div className="chat-messages">
+        <main className="chat-container modern-chat">
+            <div className="chat-messages modern-messages">
                 {!isAuthenticated && (
                     <div className="initial-message">
                          Login or Sign Up to unlock history and personalized recommendations.
@@ -270,17 +324,19 @@ function ChatWindow() {
                         Welcome, {user.username}! Start a new chat or select one from the sidebar.
                     </div>
                 )}
-                
+
                 {isHistoryLoading ? (
                     <div className="loading-indicator">Loading messages...</div>
                 ) : (
-                    history.map((message, index) => (
+                    (history || []).map((message, index) => (
                         <div 
                             key={index} 
-                            className={`message-bubble ${message.sender}`}
+                            className={`message-bubble ${message.sender} ${message._streamId ? 'streaming' : ''}`}
                         >
-                            <strong>{message.sender === 'user' ? (isAuthenticated ? `${user.username}:` : 'You:') : 'Anime Companion:'}</strong>
-                            
+                            <div className="bubble-meta">
+                              <strong>{message.sender === 'user' ? (isAuthenticated ? `${user.username}` : 'You') : 'Companion'}</strong>
+                              <span className="bubble-time">{/* optional time */}</span>
+                            </div>
                             <ReactMarkdown 
                                 children={message.text}
                                 rehypePlugins={[rehypeRaw]}
@@ -297,19 +353,20 @@ function ChatWindow() {
                 <div ref={messagesEndRef} />
             </div>
 
-            <form onSubmit={handleSend} className="chat-input-form">
+            <form onSubmit={handleSend} className="chat-input-form modern-input">
+                <button type="button" className="attach-btn" title="Attach">📎</button>
                 <input
                     type="text"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    placeholder={isLoading ? "Waiting for response..." : "Ask your question..."}
+                    placeholder={isLoading ? "Waiting for response..." : "Send a message..."}
                     disabled={isLoading}
                 />
-                <button type="submit" disabled={isLoading}>
+                <button type="submit" disabled={isLoading} className="send-btn">
                     {isLoading ? '⏳' : 'Send'}
                 </button>
             </form>
-        </div>
+        </main>
     </div>
   );
 }

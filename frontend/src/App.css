@@ -1,12 +1,42 @@
 /* Full page layout */
 .app-page {
-  min-height: 100vh;
+  position: relative;
+  width: 100%;
+  height: 100vh; /* occupy the full viewport */
   display: flex;
   flex-direction: column;
   align-items: center;
-  overflow: hidden;
-  padding: 1rem;
+  overflow: hidden; /* prevent page scrolling; chat panes handle scrolling */
+  padding: 0.8rem 0.8rem 2rem 0.8rem;
   box-sizing: border-box;
+  background: var(--auth-bg, linear-gradient(180deg, #071025, #071019));
+  background-size: cover;
+  background-position: center;
+  color: #e6eef8;
+}
+
+/* Anchor the page content to the top so only internal panes move */
+.app-page { align-items: center; justify-content: flex-start; }
+
+:root {
+  --nav-height: 56px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 900px) {
+  /* Slightly reduce nav padding and font sizes */
+  .main-nav { padding: 8px 10px; gap: 8px; }
+  .main-nav .nav-title { font-size: 1rem; }
+  .main-nav .nav-right button { padding: 6px 8px; }
+  .chatbot-wrapper { max-width: 100%; height: calc(100vh - var(--nav-height) - 12px); }
+}
+
+@media (max-width: 600px) {
+  /* Stack navbar content vertically on very small screens */
+  .main-nav { flex-direction: column; align-items: stretch; padding: 10px; }
+  .main-nav .nav-right { justify-content: flex-start; gap: 6px; margin-top: 8px; }
+  .main-nav { border-radius: 6px; }
+  .chatbot-wrapper { margin-top: 6px; height: calc(100vh - var(--nav-height) - 8px); }
 }
 
 /* Header with buttons outside chatbot */
@@ -14,7 +44,8 @@
   width: 100%;
   max-width: 1200px;
   text-align: center;
-  margin-bottom: 1rem;
+  margin: 0 auto 0.6rem auto;
+  color: #fff;
 }
 
 .app-header h1 {
@@ -38,15 +69,55 @@
 
 /* Chatbot box centered */
 .chatbot-wrapper {
-  width: 90%;
+  width: 100%;
   max-width: 1200px;
-  height: 80vh;
-  background-color: rgba(255, 255, 255, 0.15); /* Translucent background for the glass base */
-  backdrop-filter: blur(20px) saturate(180%); /* Apply the glass effect here if needed */
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  box-shadow: 0 0 20px rgba(0,0,0,0.15);
-  border-radius: 16px;
-  overflow: hidden;
+  /* Make the wrapper occupy remaining viewport below navbar. Keep a small gap. */
+  height: calc(100vh - var(--nav-height) - 20px);
+  min-height: 320px;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  margin-top: 8px; /* small breathing room, do not reserve full nav height here */
+  overflow: hidden; /* ensure internal panes control scrolling */
+}
+
+/* New main navbar that replaces the old header */
+.main-nav {
+  width: 100%;
+  max-width: 1200px;
+  margin: 12px auto 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 1px 14px;
+  background: rgba(2,6,23,0.4);
+  border-radius: 10px;
+  position: sticky; /* keeps it at top but part of flow so it doesn't overlay */
+  top: 0;
+  z-index: 999; /* high but not overlaying content */
+}
+.main-nav .nav-left { display:flex; align-items:center; }
+.main-nav .nav-title { margin:0; font-size:1.25rem; }
+.main-nav .nav-right { display:flex; gap:10px; align-items:center; }
+.main-nav .nav-right button { padding:8px 10px; border-radius:8px; cursor:pointer; }
+.main-nav .nav-user { color:#e6eef8; }
+.main-nav .nav-login { color:#cbd5e1; }
+
+/* Small toggle control for opening/closing the conversation sidebar */
+.toggle-sidebar-button {
+  background: rgba(255,255,255,0.03);
+  color: #e6eef8;
+  border: 1px solid rgba(255,255,255,0.04);
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* In-chat navbar — sits above the chat panel so controls aren't hidden */
+/* in-chat-nav removed — use .main-nav only */
+
+/* Background image used for the auth page. Paste your image URL here. */
+:root {
+  --auth-bg: url("https://i.pinimg.com/1200x/0e/9a/8a/0e9a8a987492dbc3bfe06d25c861f5fc.jpg");
 }

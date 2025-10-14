@@ -25,14 +25,22 @@ a:hover {
   color: #85b4ff;
 }
 
-body {
+html, body, #root {
+  height: 100%;
   margin: 0;
+}
+
+/* Make the app occupy the full viewport and prevent the browser window from scrolling.
+   The app itself will be static; internal panes (chat and sidebar) will scroll. */
+body {
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
   min-width: 320px;
   min-height: 100vh;
   background: inherit;
+  /* Lock body scrolling so only internal panes scroll */
+  overflow: hidden;
 }
 
 h1 {

@@ -149,3 +149,8 @@
         background-color: rgba(255, 255, 255, 0.95); /* Keep semi-opaque on mobile for text */
     }
 }
+
+@media (max-width: 360px) {
+    .recommendation-card { padding: 12px; }
+    .recommendations-container h2 { font-size: 1.4em; }
+}
