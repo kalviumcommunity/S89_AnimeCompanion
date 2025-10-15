@@ -16,32 +16,31 @@ function App() {
   // lift sidebar open state so navbar can control it
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  const renderView = () => {
-    if (!isAuthenticated) {
-      return <AuthForm />;
-    }
-    switch (currentView) {
-      case 'Recommendations':
-        return <RecommendationsPage />;
-      case 'Chat':
-      default:
-        return <ChatWindow />;
-    }
-  };
+  // NOTE: The original 'renderView' function was redundant and has been removed.
+  // The rendering logic is kept directly inside the return block for simplicity.
 
   return (
+    // The top-level 'app-page' container handles the full-screen blue background and structure.
     <div className="app-page">
-      {/* ✅ Top Header / Buttons OUTSIDE chatbot */}
+      
+      {/* Top Navigation Bar: Full width, sticky to top, handles routing and auth */}
       <nav className="main-nav">
         <div className="nav-left">
-          <h1 className="nav-title">🍜 Anime Companion AI 🦊</h1>
+          <h1 className="nav-title"> Anime Companion AI </h1>
         </div>
         <div className="nav-right">
           {isAuthenticated ? (
             <>
-              <button onClick={() => setSidebarOpen(s => !s)} className="toggle-sidebar-button">Chats</button>
+              {/* Sidebar Toggle Button */}
+              <button onClick={() => setSidebarOpen(s => !s)} className="toggle-sidebar-button">
+                {sidebarOpen ? 'Hide Chats' : 'Show Chats'}
+              </button>
+              
+              {/* View/Routing Buttons */}
               <button onClick={() => setCurrentView('Chat')} disabled={currentView === 'Chat'}>Chat Window</button>
               <button onClick={() => setCurrentView('Recommendations')} disabled={currentView === 'Recommendations'}>Get Recommendations</button>
+              
+              {/* User Info and Logout */}
               <span className="nav-user">Logged in as: <strong>{user.username}</strong></span>
               <button onClick={logout} className="logout-button">Logout</button>
             </>
@@ -51,11 +50,14 @@ function App() {
         </div>
       </nav>
 
-      {/* ✅ Centered chatbot below header */}
-        <div className="chatbot-wrapper">
+      {/* Main Content Wrapper: Stretches to fill space below nav */}
+      <div className="chatbot-wrapper">
         {isAuthenticated ? (
-          // pass sidebar state into chat view so navbar can toggle it
-          currentView === 'Chat' ? <ChatWindow sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} /> : <RecommendationsPage />
+          currentView === 'Chat' ? (
+            <ChatWindow sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+          ) : (
+            <RecommendationsPage />
+          )
         ) : (
           <AuthForm />
         )}

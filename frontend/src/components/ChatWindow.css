@@ -1,408 +1,464 @@
-/* frontend/src/components/ChatWindow.css (FINAL STABLE CSS) */
+/* frontend/src/components/ChatWindow.css (FINAL GLASS - NO BLUR - LIQUID BUBBLES) */
 
-/* ------------------------------------------- */
-/* 1. GLOBAL LAYOUT (Fixed Height & Alignment) */
-/* ------------------------------------------- */
-
-.main-chat-layout {
-    position: relative;
-    display: grid;
-    grid-template-columns: 260px 1fr;
-    grid-template-rows: 1fr; /* let the single row fill available height */
-    width: 100%;
-    margin: 0 auto;
-    border-radius: 0;
-    overflow: hidden; /* keep outer clipping, internal panes scroll */
-    height: 100%; /* fill the chatbot-wrapper height so inner message list can scroll */
-    min-height: 0; /* allow parent to define the height rather than forcing a big min-height */
-    background-image: var(--auth-bg, linear-gradient(180deg, rgba(18,18,20,0.6), rgba(28,28,30,0.6)));
-    background-size: cover;
-    background-position: center;
-}
-
-/* dark overlay for readability */
-.main-chat-layout::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: rgba(6,8,15,0.55);
-    pointer-events: none;
+/* Define variables for consistent structure and glass theme colors */
+:root {
+    /* Structural variable for centered content width (approximate ChatGPT width) */
+    --content-max-width: 760px !important; 
+    /* Glass Effect Colors (using original values) */
+    --glass-sidebar-bg: rgba(255,255,255,0.08) !important;
+    --text-primary: #ffffff !important;
+    
+    /* BLUE ACCENTS */
+    --mac-blue-strong: rgba(10, 132, 255, 0.75) !important;     
+    --mac-blue-active-sidebar: rgba(10, 132, 255, 0.35) !important; 
+    
+    /* NEW BLUE TRANSPARENT BUBBLE BACKGROUNDS */
+    --user-bubble-bg: rgba(10, 132, 255, 0.85) !important;        /* Stronger Blue (User) */
+    --model-bubble-bg: rgba(255, 255, 255, 0.3) !important;    /* Lighter Transparent (Model) */
 }
 
 /* ------------------------------------------- */
-/* 2. SIDEBAR STYLES (History List - SCROLL FIX) */
+/* 1. GLOBAL LAYOUT (App Container) */
 /* ------------------------------------------- */
-.chat-sidebar {
-    width: 260px;
-    /* macOS style glass panel to match AuthForm */
-    background: rgba(255,255,255,0.04);
-    color: #d1d5db;
-    padding: 12px;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    flex-shrink: 0;
-    border: 1px solid rgba(255,255,255,0.06);
-    backdrop-filter: blur(12px) saturate(150%);
-    -webkit-backdrop-filter: blur(12px) saturate(150%);
-    box-shadow: 0 8px 30px rgba(2,6,23,0.5);
-    border-radius: 12px;
-    position: relative;
-    z-index: 2;
+
+.app-container {
+    position: relative !important;
+    display: flex !important;
+    width: 100% !important;
+    height: 100% !important; 
+    min-height: 0 !important; 
+    overflow: hidden !important; 
+    background: transparent !important; 
+    border-radius: 16px !important;
+    box-sizing: border-box !important;
 }
 
-/* collapsed sidebar state - hide visually but keep in DOM to preserve accessibility */
-.chat-sidebar.collapsed {
-    width: 64px !important; /* narrow rail to keep a small control visible */
-    padding: 8px !important;
-    overflow: hidden;
-    transition: width 220ms ease, padding 180ms ease;
+/* ------------------------------------------- */
+/* 2. SIDEBAR STYLES (app-sidebar - NO BLUR) */
+/* ------------------------------------------- */
+.app-sidebar {
+    width: 260px !important;
+    /* Transparent Glass Effect */
+    background: var(--glass-sidebar-bg) !important;
+    color: var(--text-primary) !important;
+    padding: 12px 10px !important; 
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    flex-shrink: 0 !important;
+    border-right: 1px solid rgba(255,255,255,0.2) !important; 
+    /* NO BLUR */
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: 0 0 10px rgba(0,0,0,0.4) !important;
+    position: relative !important;
+    z-index: 10 !important;
+    transition: width 250ms ease, padding 250ms ease !important;
+    border-radius: 16px 0 0 16px !important;
 }
 
-/* When collapsed, make grid collapse the first column smoothly to a narrow rail */
-.main-chat-layout.collapsed {
-    grid-template-columns: 64px 1fr;
+/* Collapsed state */
+.app-sidebar.collapsed {
+    width: 0 !important; 
+    padding: 0 !important; 
+    overflow: hidden !important;
 }
 
-/* hide the long conversation list when collapsed, keep only top controls */
-.chat-sidebar.collapsed .conversation-list-wrapper { display: none; }
-.chat-sidebar.collapsed .sidebar-header { display: none; }
-.chat-sidebar.collapsed .new-chat-button { width: 40px; padding: 6px; }
-
-/* open sidebar FAB shown when collapsed */
-.open-sidebar-fab {
-    position: absolute;
-    left: 8px;
-    bottom: 18px;
-    width: 40px;
-    height: 40px;
-    border-radius: 999px;
-    background: linear-gradient(90deg,#06b6d4,#3b82f6);
-    color: white;
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    box-shadow: 0 6px 18px rgba(2,6,23,0.5);
+/* Sidebar Header (New Chat Button - NO BLUR) */
+.sidebar-header-controls {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    margin-bottom: 12px !important;
+    padding: 0 !important; 
 }
 
-.chat-sidebar h3 {
-    margin: 0;
-    font-size: 1rem;
-    color: #fff;
-    margin-top: 8px;
-    margin-bottom: 10px;
+/* New Chat Button (NO BLUR) */
+.new-chat-btn {
+    width: 100% !important;
+    background: rgba(255, 255, 255, 0.15) !important; 
+    color: white !important;
+    padding: 10px 14px !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important; 
+    border-radius: 6px !important; 
+    font-weight: 500 !important;
+    justify-content: flex-start !important;
+    /* NO BLUR */
+    backdrop-filter: none !important;
+    transition: background 0.15s !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
 }
 
-/* Sidebar top controls (New button & header). Keep highly visible while the list scrolls. */
-.sidebar-top {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 1px;
-    border-radius: 10px;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.08);
-    backdrop-filter: blur(8px) saturate(140%);
-    -webkit-backdrop-filter: blur(8px) saturate(140%);
-    box-shadow: 0 6px 18px rgba(2,6,23,0.45);
-    z-index: 4; /* sit above scrolling list */
+.new-chat-btn:hover {
+    background: rgba(255, 255, 255, 0.25) !important;
 }
 
-.new-chat-button {
-    width: auto;
-    background: linear-gradient(180deg,#34d399,#10b981);
-    color: white;
-    padding: 8px 12px;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    font-weight: 800;
-    transition: transform 0.08s, box-shadow 0.12s;
-    margin: 0;
+/* Sidebar Toggle Button */
+.sidebar-toggle-btn {
+    display: none !important; 
 }
 
-.new-chat-button:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 18px rgba(16,185,129,0.18);
+/* Sidebar List */
+.conversation-list-container {
+    flex-grow: 1 !important;
+    overflow-y: auto !important; 
+    min-height: 0 !important; 
+    padding-right: 4px !important; 
+    -webkit-overflow-scrolling: touch !important;
 }
 
-/* --- NEW SCROLLABLE WRAPPER (Structural Fix) --- */
-.conversation-list-wrapper {
-    flex-grow: 1;
-    overflow-y: auto; /* only the sidebar list scrolls */
-    min-height: 0; /* allow the wrapper to shrink inside flex/grid */
-    padding-right: 6px;
-    -webkit-overflow-scrolling: touch;
-    /* Sidebar should fill the full layout height minus small top area */
-    max-height: calc(100vh - var(--nav-height,56px) - 120px);
-    padding-top: 10px; /* small gap so top controls don't visually collide with list */
+.no-chats-message {
+    padding: 10px 0 !important;
+    font-size: 0.9rem !important;
+    color: #a0a0a0 !important;
+    text-align: center !important;
 }
 
-.conversation-list {
-    /* The inner list is now just a container for the items */
-    display: block; 
-    padding: 0; 
-}
-/* --- END NEW SCROLLABLE WRAPPER STYLES --- */
-
-
-.conversation-item {
-    padding: 10px 8px;
-    margin-bottom: 8px;
-    border-radius: 8px;
-    cursor: pointer;
-    background: transparent;
-    transition: background 0.18s, transform 0.08s;
-    position: relative;
-    color: #e6eef8;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+.chat-history-list {
+    display: flex !important; 
+    flex-direction: column !important;
+    gap: 4px !important; 
 }
 
-.conversation-item:hover {
-    background: rgba(255,255,255,0.02);
+.chat-history-item {
+    padding: 10px 10px !important; 
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    background: transparent !important;
+    transition: background 0.18s !important;
+    position: relative !important;
+    color: var(--text-primary) !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
 }
 
-.conversation-item.active {
-    background: linear-gradient(90deg, rgba(59,130,246,0.16), rgba(99,102,241,0.12));
-    color: #fff;
+.chat-history-item:hover {
+    background: rgba(255,255,255,0.1) !important; 
 }
 
-.conversation-item .title {
-    font-weight: 600;
-    font-size: 0.95em;
-    margin: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    flex-grow: 1;
-    color: inherit;
+.chat-history-item.active {
+    background: var(--mac-blue-active-sidebar) !important; 
+    font-weight: 600 !important;
 }
 
-.conversation-item .chat-date {
-    font-size: 0.75em;
-    color: #9ca3af;
-    flex-shrink: 0;
+.chat-title {
+    flex-grow: 1 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    font-size: 0.9rem !important;
+    line-height: 1.2 !important;
 }
 
-/* --- DELETE BUTTON (Text on Hover) --- */
-.delete-button {
-    background: rgba(255,255,255,0.03);
-    border: none;
-    color: #fff;
-    padding: 6px 8px;
-    border-radius: 6px;
-    cursor: pointer;
-    opacity: 0;
-    transform: scale(0.9);
-    transition: opacity 0.14s, transform 0.14s;
+.chat-icon {
+    flex-shrink: 0 !important;
+    color: #a0a0a0 !important;
 }
-.conversation-item:hover .delete-button {
-    opacity: 1;
-    transform: scale(1);
+
+.delete-chat-btn {
+    flex-shrink: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    width: 20px !important;
+    height: 20px !important;
+    color: #d1d5db !important;
+    margin-left: auto !important;
+    transition: color 0.15s !important;
+}
+.delete-chat-btn:hover {
+    color: #ef4444 !important;
+    background: transparent !important;
+}
+
+.sidebar-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.15) !important;
+    padding-top: 12px !important;
+    margin-top: auto !important; 
+}
+
+.settings-btn {
+    width: 100% !important;
+    background: transparent !important;
+    border: none !important;
+    color: #d1d5db !important;
+    padding: 8px 10px !important;
+    border-radius: 8px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    justify-content: flex-start !important;
+}
+.settings-btn:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: #fff !important;
 }
 
 
 /* ------------------------------------------- */
-/* 3. MAIN CHAT CONTAINER (Right Side - Messages Scroll) */
+/* 3. MAIN CHAT AREA (chat-main-content - NO BLUR) */
 /* ------------------------------------------- */
 
-.chat-container {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    min-height: 0; /* allow flex children to shrink and enable internal scrolling */
-    /* macOS glass panel matching AuthForm */
-    background: rgba(255,255,255,0.02);
-    border: 1px solid rgba(255,255,255,0.04);
-    backdrop-filter: blur(8px) saturate(140%);
-    -webkit-backdrop-filter: blur(8px) saturate(140%);
-    position: relative;
-    z-index: 2;
-    transition: margin-left 220ms ease, width 220ms ease;
+.chat-main-content {
+    flex-grow: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important; 
+    min-height: 0 !important; 
+    background: rgba(0, 0, 0, 0.2) !important;
+    border: 1px solid rgba(255,255,255,0.1) !important; 
+    /* NO BLUR */
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    position: relative !important;
+    z-index: 5 !important;
+    border-radius: 0 16px 16px 0 !important; 
+    overflow: hidden !important;
 }
 
-/* When the overall layout is collapsed (sidebar closed), reduce chat container left margin */
-.main-chat-layout.collapsed .chat-container {
-    margin-left: 0;
+/* Full border-radius when sidebar is collapsed (or not used) */
+.app-container:not(.sidebar-open) .chat-main-content {
+    border-radius: 16px !important;
 }
 
-/* On wide screens, normally the chat container sits beside the sidebar. We explicitly set a left margin to reserve space when expanded. */
-.main-chat-layout .chat-container { margin-left: 0; }
+/* Message Display Area */
+.messages-display-area {
+    flex-grow: 1 !important; 
+    padding: 0 20px !important; 
+    overflow-y: auto !important; 
+    min-height: 0 !important; 
+    
+    max-width: var(--content-max-width) !important;
+    width: 100% !important;
+    margin: 0 auto !important;
+    padding-top: 20px !important;
+    padding-bottom: 20px !important; 
+    display: flex !important; 
+    flex-direction: column !important;
+    gap: 15px !important; 
+}
 
-.chat-messages {
-    flex-grow: 1;
-    padding: 14px 28px; /* tighter padding to keep messages closer and avoid overlap */
-    overflow-y: auto; /* only the messages area scrolls */
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    width: 100%;
-    min-height: 0; /* allow to shrink inside flex container */
-    -webkit-overflow-scrolling: touch;
-    /* Reserve about 72px for input area + spacing so messages scroll properly */
-    max-height: calc(100vh - var(--nav-height,56px) - 140px);
+/* --- Initial/Empty Screen Styles --- */
+.initial-message-screen {
+    max-width: var(--content-max-width) !important; 
+    margin: 0 auto !important;
+}
+
+
+/* ------------------------------------------- */
+/* 4. MESSAGE BUBBLE STYLES (Bubbles Restored) */
+/* ------------------------------------------- */
+
+.message-row {
+    display: flex !important;
+    padding: 0 !important; 
+    border-bottom: none !important; 
+    margin: 0 !important;
+    width: 100% !important;
+}
+
+/* User Message (Aligned Right) */
+.user-row {
+    justify-content: flex-end !important;
+    background-color: transparent !important;
+}
+
+/* Model Message (Aligned Left) */
+.model-row {
+    justify-content: flex-start !important;
+    background-color: transparent !important;
+}
+
+/* Bubble Content Wrapper (This creates the bubble shape) */
+.message-content {
+    max-width: 85% !important; 
+    width: auto !important;
+    padding: 12px 18px !important;
+    line-height: 1.5 !important;
+    color: var(--text-primary) !important;
+    border-radius: 18px !important;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3) !important;
+    text-align: left !important;
+    position: relative !important; 
+}
+
+/* User Bubble (Blue Color) */
+.user-row .message-content {
+    background: var(--user-bubble-bg) !important; 
+    color: #fff !important;
+    border-radius: 18px 18px 6px 18px !important; /* Tail right-bottom */
+    margin-right: 0 !important;
+}
+
+/* Model Bubble (Light Glass Color) */
+.model-row .message-content {
+    background: var(--model-bubble-bg) !important;
+    color: var(--text-primary) !important;
+    border-radius: 18px 18px 18px 6px !important; /* Tail left-bottom */
+    margin-left: 0 !important;
+}
+
+/* Hide Icons - Icons are generally not used when using the bubble style */
+.message-icon {
+    display: none !important;
+}
+
+.message-meta strong {
+    display: none !important; 
+}
+
+.message-text {
+    font-size: 1rem !important;
+}
+
+/* --- MARKDOWN STYLES (Code blocks inside bubbles) --- */
+.message-text pre {
+    background: rgba(0, 0, 0, 0.5) !important; 
+    color: #fff !important;
+    padding: 10px !important;
+    border-radius: 6px !important;
+    margin: 10px 0 !important;
+}
+.message-text code {
+    background: rgba(255, 255, 255, 0.15) !important; 
+    padding: 2px 5px !important;
+    border-radius: 3px !important;
+}
+
+
+/* --- Thinking Indicator (3 dots) --- */
+.loading-dots {
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    min-height: 20px !important;
 }
 
 /* ------------------------------------------- */
-/* 4. CHAT MESSAGE & INPUT STYLES (Readability Fix) */
+/* 5. INPUT FORM (Fixed at Bottom, Centered - LIQUID GLASS) */
 /* ------------------------------------------- */
 
-.message-bubble {
-    padding: 12px 16px;
-    max-width: calc(100% - 40px);
-    width: 100%;
-    line-height: 1.6;
-    word-wrap: break-word;
-    box-shadow: none;
+.chat-input-area-wrapper {
+    position: sticky !important;
+    bottom: 0 !important;
+    /* Soft gradient fade from the bottom, necessary because we removed the blur from the main content */
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.5), transparent) !important; 
+    flex-shrink: 0 !important; 
+    padding: 24px 0 16px 0 !important; 
+    border-top: none !important;
+    
+    width: 100% !important;
+    max-width: var(--content-max-width) !important;
+    margin: 0 auto !important;
 }
 
-.user {
-    align-self: flex-end;
-    background: linear-gradient(90deg,#16a34a,#059669);
-    color: white;
-    border-radius: 18px 18px 6px 18px;
-}
-
-.model {
-    align-self: stretch;
-    background: linear-gradient(90deg,#1e3a8a,#2563eb);
-    color: white;
-    border-radius: 12px;
-}
-
-.bubble-meta strong {
-    display: block;
-    margin-bottom: 3px;
-    font-size: 0.9em;
-    font-weight: 700;
-}
-
-.message-bubble strong {
-    display: inline;
-    margin-bottom: 0;
-}
-
-/* --- MARKDOWN VISUALIZATION STYLES --- */
-.message-bubble.model p,
-.message-bubble.model ul,
-.message-bubble.model ol,
-.message-bubble.model li {
-    color: white;
-    margin: 6px 0;
-    font-size: 1em;
-}
-
-.message-bubble.model h3 {
-    color: #ff3b30; 
-    font-size: 1.1em;
-    font-weight: 700;
-    margin-top: 10px;
-    margin-bottom: 5px;
-    padding-bottom: 2px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.4); 
-}
-
-/* --- INPUT FORM --- */
 .chat-input-form {
-    display: flex;
-    padding: 12px 14px;
-    border-top: 1px solid rgba(255,255,255,0.06);
-    background: rgba(255,255,255,0.03);
-    flex-shrink: 0;
-    gap: 8px;
-    align-items: center;
+    display: flex !important;
+    /* Use align-items: flex-end to keep the input at the bottom as it grows */
+    align-items: flex-end !important; 
+    padding: 12px 16px !important;
+    /* Glass Border and Background */
+    border: 1px solid rgba(255,255,255,0.2) !important; 
+    background: rgba(0,0,0,0.6) !important; 
+    /* NO BLUR */
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border-radius: 12px !important; 
+    gap: 10px !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
 }
 
-.chat-input-form input {
-    flex-grow: 1;
-    padding: 12px 14px;
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 14px;
-    background: rgba(255,255,255,0.04);
-    color: #0b1220;
-    font-size: 1rem;
+/* TARGET THE TEXTAREA (Auto-growing Input) */
+.chat-input-form textarea {
+    flex-grow: 1 !important;
+    padding: 0 !important; 
+    
+    /* === LIQUID GLASS INPUT STYLES === */
+    background: transparent !important; /* Make the input itself transparent */
+    border: none !important; /* Remove native border */
+    outline: none !important; /* Remove focus outline */
+    
+    /* === AUTO-RESIZE STYLES === */
+    resize: none !important; /* Disable native user resizing */
+    overflow: hidden !important; /* Hide scrollbar */
+    line-height: 1.5 !important; /* Set line height for accurate JS sizing */
+    font-family: inherit !important; /* Important for accurate scrollHeight calculation */
+    /* ================================= */
+    
+    color: #f3f4f6 !important;
+    font-size: 1rem !important;
+    min-height: 20px !important; 
 }
 
-.chat-input-form button {
-    padding: 10px 14px;
-    background: linear-gradient(90deg,#ef4444,#dc2626);
-    color: white;
-    border: none;
-    border-radius: 14px;
-    cursor: pointer;
-    font-weight: 700;
+/* Ensure focus is subtle and doesn't break the glass aesthetic */
+.chat-input-form textarea:focus {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
 }
 
-.chat-input-form button:disabled {
-    background-color: #6b7280;
-    cursor: not-allowed;
+/* Send Button */
+.send-btn {
+    width: 24px !important;
+    height: 24px !important;
+    padding: 0 !important;
+    border-radius: 4px !important; 
+    background: #0a84ff !important;
+    border: none !important;
+    flex-shrink: 0 !important; /* Prevents button from being squeezed */
+}
+.send-btn:disabled {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+}
+.send-btn svg {
+    width: 14px !important; 
+    height: 14px !important;
+    fill: currentColor !important;
 }
 
-/* modern variants */
-.modern .modern-sidebar .sidebar-top { display:flex; align-items:center; gap:8px; }
-.modern .companion-title { margin:0; font-size:1.05rem; color:#fff; }
-.modern .companion-sub { color:#9ca3af; font-size:0.85rem; margin-left:8px; }
-.modern .user-badge { background: rgba(255,255,255,0.04); padding:6px 10px; border-radius:12px; color:#fff; font-weight:600; }
-.modern .modern-messages { padding:18px; }
-.modern .bubble-meta { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
-.modern .bubble-meta strong { font-weight:700; font-size:0.95rem; }
-.attach-btn { background: transparent; border: none; color: #c7d2fe; font-size: 1.1rem; cursor: pointer; }
-.send-btn { background: linear-gradient(90deg,#06b6d4,#3b82f6); color: white; border-radius:12px; padding:8px 14px; border:none; font-weight:700; }
+/* ------------------------------------------- */
+/* 6. RESPONSIVE & MOBILE TWEAKS */
+/* ------------------------------------------- */
 
-/* responsive tweaks */
 @media (max-width: 800px) {
-    /* Make sidebar overlay on small screens */
-    .chat-sidebar {
-        position: fixed;
-        left: 12px;
-        top: calc(var(--nav-height,56px) + 12px);
-        bottom: 80px;
-        z-index: 80;
-        width: calc(80%);
-        max-width: 320px;
-        box-shadow: 0 12px 40px rgba(2,6,23,0.5);
-        transform: translateX(-6px);
+    /* Mobile Layout: Sidebar slides in over content */
+    .app-sidebar {
+        /* NO BLUR */
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        transform: translateX(-100%) !important;
     }
-    .main-chat-layout { width: 98%; grid-template-columns: 1fr; }
-    .message-bubble { max-width: 92%; }
-    .conversation-list-wrapper { max-height: calc(100vh - var(--nav-height,56px) - 180px); }
-}
 
-/* Typing caret for streaming text */
-.message-bubble.model.loading::after,
-.message-bubble.model.streaming::after {
-    content: "";
-    display: inline-block;
-    width: 8px;
-    height: 16px;
-    background: linear-gradient(180deg,#fff,#e6eef8);
-    margin-left: 6px;
-    animation: blink 1s steps(2,end) infinite;
-    vertical-align: middle;
-}
-
-@keyframes blink {
-    0%, 50% { opacity: 1; }
-    51%, 100% { opacity: 0; }
-}
-
-/* Mobile toggle button */
-.mobile-toggle { background: transparent; border: none; color: #cbd5e1; font-size: 1.2rem; margin-right: 8px; }
-
-@media (max-width: 800px) {
-    .chat-sidebar { position: absolute; left: 0; top: 70px; bottom: 20px; z-index: 40; box-shadow: 0 8px 30px rgba(2,6,23,0.5); }
-    .main-chat-layout { position: relative; }
-}
-
-@media (max-width: 420px) {
-    .chat-messages { padding: 10px 12px; gap: 8px; }
-    .message-bubble { padding: 10px 12px; font-size: 14px; }
-    .chat-input-form { padding: 10px; }
-    .chat-input-form input { padding: 10px 12px; }
-    .new-chat-button { padding: 6px 10px; font-size: 14px; }
+    .messages-display-area {
+        max-width: 100% !important; 
+        padding: 0 10px !important;
+    }
+    
+    .chat-input-area-wrapper {
+        max-width: 100% !important;
+        padding: 16px 10px 8px 10px !important;
+    }
+    
+    /* Mobile row adjustments */
+    .user-row {
+        justify-content: flex-end !important; 
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    .model-row {
+        justify-content: flex-start !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    
+    .message-content {
+        max-width: 95% !important;
+    }
 }
