@@ -1,0 +1,200 @@
+/* frontend/src/components/Sidebar.module.css (FINAL CLEANUP) */
+
+/* Define variables if necessary, but generally use variables defined in :root */
+
+/* ------------------------------------------- */
+/* 2. SIDEBAR STYLES (app-sidebar) */
+/* ------------------------------------------- */
+.app-sidebar {
+    width: 260px !important;
+    min-width: 260px !important; 
+    background: var(--glass-sidebar-bg) !important;
+    color: var(--text-primary) !important;
+    padding: 12px 10px !important; 
+    display: flex !important;
+    flex-direction: column !important; 
+    height: 100% !important;
+    flex-shrink: 0 !important;
+    border-right: 1px solid rgba(255,255,255,0.2) !important; 
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: 0 0 10px rgba(0,0,0,0.4) !important;
+    /* 🌟 CLEANUP: Setting z-index lower as the navbar should control its own layering */
+    position: relative !important;
+    z-index: 5 !important; 
+    transition: width 250ms ease, padding 250ms ease, min-width 250ms ease !important;
+    border-radius: 16px 0 0 16px !important;
+}
+
+/* Collapsed state */
+.collapsed { 
+    width: 0 !important; 
+    min-width: 0 !important; 
+    padding: 0 !important; 
+    overflow: hidden !important;
+}
+
+/* Sidebar Header (New Chat Button - NO BLUR) */
+.sidebar-header-controls {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    margin-bottom: 12px !important;
+    padding: 0 !important; 
+}
+
+/* New Chat Button (NO BLUR) */
+.new-chat-btn {
+    width: 100% !important;
+    background: rgba(255, 255, 255, 0.15) !important; 
+    color: white !important;
+    padding: 10px 14px !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important; 
+    border-radius: 6px !important; 
+    font-weight: 500 !important;
+    justify-content: flex-start !important;
+    backdrop-filter: none !important;
+    transition: background 0.15s !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+.new-chat-btn:hover {
+    background: rgba(255, 255, 255, 0.25) !important;
+}
+
+/* Sidebar Toggle Button */
+.sidebar-toggle-btn {
+    display: none !important; 
+}
+
+/* Sidebar List */
+.conversation-list-container {
+    flex-grow: 1 !important;
+    overflow-y: auto !important; 
+    min-height: 0 !important; 
+    padding-right: 4px !important; 
+    -webkit-overflow-scrolling: touch !important;
+}
+
+.no-chats-message {
+    padding: 10px 0 !important;
+    font-size: 0.9rem !important;
+    color: #a0a0a0 !important;
+    text-align: center !important;
+}
+
+.chat-history-list {
+    display: flex !important; 
+    flex-direction: column !important;
+    gap: 4px !important; 
+}
+
+.chat-history-item {
+    padding: 10px 10px !important; 
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    background: transparent !important;
+    transition: background 0.18s !important;
+    position: relative !important;
+    color: var(--text-primary) !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+.chat-history-item:hover {
+    background: rgba(255,255,255,0.1) !important; 
+}
+
+.active { 
+    background: var(--mac-blue-active-sidebar) !important; 
+    font-weight: 600 !important;
+}
+
+.chat-title {
+    flex-grow: 1 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    font-size: 0.9rem !important;
+    line-height: 1.2 !important;
+}
+
+.chat-icon {
+    flex-shrink: 0 !important;
+    color: #a0a0a0 !important;
+}
+
+.delete-chat-btn {
+    flex-shrink: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    width: 20px !important;
+    height: 20px !important;
+    color: #d1d5db !important;
+    margin-left: auto !important;
+    transition: color 0.15s !important;
+}
+
+.delete-chat-btn:hover {
+    color: #ef4444 !important;
+    background: transparent !important;
+}
+
+/* 🌟 FOOTER STYLES */
+.sidebar-footer {
+    /* Critical property to push the footer to the bottom */
+    margin-top: auto !important; 
+    
+    border-top: 1px solid rgba(255, 255, 255, 0.15) !important;
+    padding-top: 12px !important;
+    
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+}
+
+.user-info-status {
+    padding: 5px 0 8px 5px !important; 
+    color: #a0a0a0 !important;
+    font-size: 0.9rem !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+.user-info-status strong {
+    color: var(--text-primary) !important;
+    font-weight: 600 !important;
+}
+
+
+/* Logout Button Styling */
+.logout-button-sidebar {
+    width: 100% !important;
+    text-align: center !important;
+    padding: 10px 14px !important;
+    border-radius: 6px !important; 
+    background: #d32f2f !important; 
+    color: white !important;
+    border: none !important;
+    cursor: pointer !important;
+    transition: background 0.2s !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+    font-weight: 500 !important;
+}
+
+.logout-button-sidebar:hover {
+    background: #c02020 !important;
+}
+
+/* Original Settings button is no longer needed/used, removed its conflicting styles */
+.settings-btn {
+    display: none !important;
+}

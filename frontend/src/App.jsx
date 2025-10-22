@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import ChatWindow from './components/ChatWindow';
 import AuthForm from './components/AuthForm';
 import RecommendationsPage from './components/RecommendationsPage'; 
+import HomePage from './components/HomePage'; 
+import Navbar from './components/Navbar'; // 🌟 Importing the separate Navbar component
 import { useAuth } from './context/AuthContext'; 
 import './App.css'; 
 import axios from 'axios'; 
@@ -12,55 +14,55 @@ axios.defaults.withCredentials = true;
 
 function App() {
   const { isAuthenticated, user, logout } = useAuth(); 
-  const [currentView, setCurrentView] = useState('Chat'); 
-  // lift sidebar open state so navbar can control it
+  
+  // State to control which main view is displayed
+  const [currentView, setCurrentView] = useState('Home'); 
+  
+  // State lifted from ChatWindow to be controlled by Navbar/Home components
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  // NOTE: The original 'renderView' function was redundant and has been removed.
-  // The rendering logic is kept directly inside the return block for simplicity.
+  // Helper function to render the current view based on state
+  const renderView = () => {
+      // If not authenticated, always show the login/signup form
+      if (!isAuthenticated) {
+        return <AuthForm />;
+      }
+      
+      // If authenticated, render the selected view
+      switch (currentView) {
+        case 'Home':
+          // HomePage needs setCurrentView to navigate to Chat or Recs
+          return <HomePage setCurrentView={setCurrentView} />;
+        case 'Chat':
+          // ChatWindow needs sidebar state management
+          return (
+            <ChatWindow 
+              sidebarOpen={sidebarOpen} 
+              setSidebarOpen={setSidebarOpen} 
+            />
+          );
+        case 'Recommendations':
+          return <RecommendationsPage />;
+        default:
+          return <HomePage setCurrentView={setCurrentView} />;
+      }
+  };
 
   return (
-    // The top-level 'app-page' container handles the full-screen blue background and structure.
+    // The top-level 'app-page' container handles the full-screen background and structure.
     <div className="app-page">
       
-      {/* Top Navigation Bar: Full width, sticky to top, handles routing and auth */}
-      <nav className="main-nav">
-        <div className="nav-left">
-          <h1 className="nav-title"> Anime Companion AI </h1>
-        </div>
-        <div className="nav-right">
-          {isAuthenticated ? (
-            <>
-              {/* Sidebar Toggle Button */}
-              <button onClick={() => setSidebarOpen(s => !s)} className="toggle-sidebar-button">
-                {sidebarOpen ? 'Hide Chats' : 'Show Chats'}
-              </button>
-              
-              {/* View/Routing Buttons */}
-              <button onClick={() => setCurrentView('Chat')} disabled={currentView === 'Chat'}>Chat Window</button>
-              <button onClick={() => setCurrentView('Recommendations')} disabled={currentView === 'Recommendations'}>Get Recommendations</button>
-              
-              {/* User Info and Logout */}
-              <span className="nav-user">Logged in as: <strong>{user.username}</strong></span>
-              <button onClick={logout} className="logout-button">Logout</button>
-            </>
-          ) : (
-            <span className="nav-login">Login to start chatting and save your history!</span>
-          )}
-        </div>
-      </nav>
+      {/* 🌟 Navbar component is responsible for all main navigation */}
+      <Navbar
+          currentView={currentView}
+          setCurrentView={setCurrentView}
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+      />
 
-      {/* Main Content Wrapper: Stretches to fill space below nav */}
+      {/* Main Content Wrapper: This container holds the current view (AuthForm, HomePage, ChatWindow, etc.) */}
       <div className="chatbot-wrapper">
-        {isAuthenticated ? (
-          currentView === 'Chat' ? (
-            <ChatWindow sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-          ) : (
-            <RecommendationsPage />
-          )
-        ) : (
-          <AuthForm />
-        )}
+        {renderView()}
       </div>
     </div>
   );
