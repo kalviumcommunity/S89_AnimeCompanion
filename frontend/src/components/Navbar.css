@@ -1,0 +1,107 @@
+/* frontend/src/components/Navbar.css */
+
+/* --- Navbar Container --- */
+.main-nav {
+  width: 100%;
+  max-width: 100%;
+  margin: 0; 
+  
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px; 
+  
+  background: rgba(255, 255, 255, 0.05); /* Glass Background */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  position: sticky; 
+  top: 0; 
+  z-index: 999; 
+  color: #e6eef8;
+}
+
+.nav-left { 
+    display: flex; 
+    align-items: center; 
+}
+
+.nav-title { 
+    margin: 0; 
+    font-size: 1.25rem; 
+}
+
+.nav-right { 
+    display: flex; 
+    gap: 10px; 
+    align-items: center; 
+}
+
+/* --- Buttons and Text --- */
+
+/* Base style for all buttons in the navbar */
+.nav-btn {
+    padding: 8px 10px; 
+    border-radius: 8px; 
+    cursor: pointer; 
+    /* Inherit base button style from index.css, or define a minimalist style here */
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    transition: background 0.2s;
+}
+
+.nav-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.nav-btn:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.logout-button {
+  background: #d32f2f; /* Red Accent */
+  border-color: #d32f2f;
+}
+
+.logout-button:hover:not(:disabled) {
+    background: #c02020;
+}
+
+.nav-user { 
+    color: #e6eef8; 
+    font-size: 0.95rem;
+}
+
+.nav-login { 
+    color: #cbd5e1; 
+}
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 900px) {
+  .main-nav { 
+      padding: 8px 10px; 
+      gap: 8px; 
+  }
+  .nav-title { 
+      font-size: 1rem; 
+  }
+  .nav-right button { 
+      padding: 6px 8px; 
+  }
+}
+
+@media (max-width: 600px) {
+    .main-nav { 
+        flex-direction: column; 
+        align-items: stretch; 
+        padding: 10px 8px; 
+    }
+    .nav-right { 
+        justify-content: flex-start; 
+        gap: 6px; 
+        margin-top: 8px; 
+        flex-wrap: wrap; /* Allow buttons to wrap */
+    }
+}

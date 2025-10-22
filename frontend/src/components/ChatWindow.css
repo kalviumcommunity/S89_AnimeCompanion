@@ -1,4 +1,4 @@
-/* frontend/src/components/ChatWindow.css (FINAL GLASS - NO BLUR - LIQUID BUBBLES) */
+/* frontend/src/components/ChatWindow.css (FINAL AND COMPLETE) */
 
 /* Define variables for consistent structure and glass theme colors */
 :root {
@@ -23,7 +23,7 @@
 
 .app-container {
     position: relative !important;
-    display: flex !important;
+    display: flex !important; /* CRITICAL: Enables horizontal sizing */
     width: 100% !important;
     height: 100% !important; 
     min-height: 0 !important; 
@@ -34,10 +34,13 @@
 }
 
 /* ------------------------------------------- */
-/* 2. SIDEBAR STYLES (app-sidebar - NO BLUR) */
+/* 2. SIDEBAR STYLES (app-sidebar - CRITICAL MIN-WIDTH ADDITIONS) */
 /* ------------------------------------------- */
 .app-sidebar {
     width: 260px !important;
+    /* >> CRITICAL ADDITION 1: Prevents the sidebar from shrinking when open */
+    min-width: 260px !important; 
+    
     /* Transparent Glass Effect */
     background: var(--glass-sidebar-bg) !important;
     color: var(--text-primary) !important;
@@ -53,13 +56,16 @@
     box-shadow: 0 0 10px rgba(0,0,0,0.4) !important;
     position: relative !important;
     z-index: 10 !important;
-    transition: width 250ms ease, padding 250ms ease !important;
+    /* >> CRITICAL UPDATE 1: Include min-width in transition */
+    transition: width 250ms ease, padding 250ms ease, min-width 250ms ease !important;
     border-radius: 16px 0 0 16px !important;
 }
 
 /* Collapsed state */
 .app-sidebar.collapsed {
     width: 0 !important; 
+    /* >> CRITICAL ADDITION 2: Allows sidebar to fully collapse */
+    min-width: 0 !important; 
     padding: 0 !important; 
     overflow: hidden !important;
 }
@@ -202,11 +208,14 @@
 
 
 /* ------------------------------------------- */
-/* 3. MAIN CHAT AREA (chat-main-content - NO BLUR) */
+/* 3. MAIN CHAT AREA (chat-main-content - CRITICAL MIN-WIDTH ADDITION) */
 /* ------------------------------------------- */
 
 .chat-main-content {
     flex-grow: 1 !important;
+    /* >> CRITICAL ADDITION 3: Allows the main content to shrink when the sidebar is open */
+    min-width: 0 !important; 
+    
     display: flex !important;
     flex-direction: column !important;
     height: 100% !important; 

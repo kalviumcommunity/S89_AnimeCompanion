@@ -1,96 +1,25 @@
-/* index.css (FINAL ROOT BACKGROUND FIXES WITH !IMPORTANT) */
+/* frontend/src/index.css (ABSOLUTE MINIMAL RESET) */
+
 :root {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Avenir, Helvetica, Arial, sans-serif !important;
-  line-height: 1.5 !important;
-  font-weight: 400 !important;
-
-  color-scheme: light dark !important;
-  color: rgba(255, 255, 255, 0.9) !important;
+  /* System font definitions */
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
   
-  /* REMOVED: background gradient and blur from the root to allow App.css image to show */
-  background: none !important; 
-  backdrop-filter: none !important; 
-  -webkit-backdrop-filter: none !important;
-
-  font-synthesis: none !important;
-  text-rendering: optimizeLegibility !important;
-  -webkit-font-smoothing: antialiased !important;
-  -moz-osx-font-smoothing: grayscale !important;
+  /* Retaining key structural variables to be used in component files */
+  --nav-height: 56px; 
 }
 
-a {
-  font-weight: 500 !important;
-  color: #66a3ff !important;
-  text-decoration: inherit !important;
-}
-a:hover {
-  color: #85b4ff !important;
-}
-
+/* Base HTML/Body/Root setup for full viewport */
 html, body, #root {
-  height: 100% !important;
-  margin: 0 !important;
+  height: 100%;
+  margin: 0;
 }
 
-/* Make the app occupy the full viewport and prevent the browser window from scrolling. */
 body {
-  display: flex !important;
-  justify-content: center !important;
-  align-items: flex-start !important;
-  min-width: 320px !important;
-  min-height: 100vh !important;
-  /* Set body background to transparent to fully rely on the App.css background image */
-  background: transparent !important;
-  /* Lock body scrolling so only internal panes scroll */
-  overflow: hidden !important;
+  min-width: 320px;
+  min-height: 100vh;
+  /* CRITICAL: Locking the body for internal scrolling */
+  overflow: hidden; 
 }
 
-h1 {
-  font-size: 3.2em !important;
-  line-height: 1.1 !important;
-}
-
-/* Button styles now default to a glass look */
-button {
-  border-radius: 8px !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
-  padding: 0.6em 1.2em !important;
-  font-size: 1em !important;
-  font-weight: 500 !important;
-  font-family: inherit !important;
-  background: rgba(255, 255, 255, 0.1) !important;
-  color: white !important;
-  cursor: pointer !important;
-  transition: all 0.25s ease !important;
-  backdrop-filter: blur(10px) !important;
-  -webkit-backdrop-filter: blur(10px) !important;
-}
-
-button:hover {
-  background: rgba(255, 255, 255, 0.2) !important;
-  border-color: rgba(255, 255, 255, 0.4) !important;
-}
-
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color !important;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547 !important;
-    /* REMOVED: background and blur from light scheme */
-    background: none !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-  }
-
-  button {
-    background: rgba(0, 0, 0, 0.05) !important;
-    color: #213547 !important;
-  }
-
-  button:hover {
-    background: rgba(0, 0, 0, 0.1) !important;
-  }
-}
+/* All other styles (color, links, buttons) are now removed and must be defined in components. */

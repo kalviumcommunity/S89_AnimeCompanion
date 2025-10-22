@@ -1,157 +1,60 @@
-/* App.css (FINAL, GUARANTEED FULL-SCREEN FIX) */
-/* Full page layout */
+/* frontend/src/App.css (Minimal Structure for Layout) */
+
+/* 1. Full Page Layout */
 .app-page {
-  position: relative !important;
-  width: 100% !important;
-  height: 100vh !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  overflow: hidden !important;
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0; 
+  box-sizing: border-box;
   
-  /* CRITICAL FIX 1: REMOVE ALL PADDING from root element. Horizontal padding is 0. */
-  padding: 0 !important; 
-  box-sizing: border-box !important;
-  
-  /* Solid Blue Background */
-  background: linear-gradient(135deg, #1e3a8a 0%, #0c0a09 100%) !important; 
-  background-size: cover !important;
-  background-position: center !important;
-  color: #e6eef8 !important;
+  /* Retained for background/color fallback, but simplified */
+  background: #1e3a8a; 
+  color: #e6eef8;
 }
 
-/* Anchor the page content to the top so only internal panes move */
-.app-page { align-items: center !important; justify-content: flex-start !important; }
-
-:root {
-  --page-padding-vertical: 16px !important; /* Used for vertical gap calculation */
-  --nav-height: 56px !important; 
-}
-
-/* Header with buttons outside chatbot */
-.app-header {
-  width: 100% !important;
-  max-width: 100% !important; 
-  text-align: center !important;
-  /* CRITICAL FIX 2: Add 16px top margin back */
-  margin: 16px 0 0 !important; 
-  padding: 0 16px 8px 16px !important; /* Internal padding for horizontal spacing */
-}
-
-.app-header h1 {
-  margin: 0 !important;
-  font-size: 2rem !important;
-  margin-bottom: 0.5rem !important;
-}
-
-.auth-nav {
-  display: flex !important;
-  flex-wrap: wrap !important;
-  justify-content: center !important;
-  gap: 0.5rem !important;
-  margin-top: 0.5rem !important;
-}
-
-.logout-button {
-  background: #d32f2f !important;
-  color: white !important;
-}
-
-/* New main navbar (Full Width) */
+/* 2. Main Navigation (Cleaned) */
 .main-nav {
-  width: 100% !important;
-  max-width: 100% !important;
-  /* CRITICAL FIX 3: Remove all external margins */
-  margin: 0 !important; 
-  
-  display: flex !important;
-  justify-content: space-between !important;
-  align-items: center !important;
-  gap: 12px !important;
-  padding: 8px 16px !important; 
-  
-  background: rgba(255, 255, 255, 0.05) !important;
-  backdrop-filter: none !important; 
-  -webkit-backdrop-filter: none !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5) !important;
-  border-radius: 0 !important; 
-  position: sticky !important; 
-  top: 0 !important; 
-  z-index: 999 !important; 
-  border-left: none !important;
-  border-right: none !important;
+  width: 100%;
+  /* Set Flex properties for structure */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px; 
+  /* Retained for sticky behavior */
+  position: sticky; 
+  top: 0; 
+  z-index: 999; 
+  /* Removed nested .nav-left/.nav-right styles */
 }
 
-.main-nav .nav-left { display:flex !important; align-items:center !important; }
-.main-nav .nav-title { margin:0 !important; font-size:1.25rem !important; }
-.main-nav .nav-right { display:flex !important; gap:10px !important; align-items:center !important; }
-.main-nav .nav-right button { 
-    padding:8px 10px !important; 
-    border-radius:8px !important; 
-    cursor:pointer !important; 
-}
-.main-nav .nav-user { color:#e6eef8 !important; }
-.main-nav .nav-login { color:#cbd5e1 !important; }
+/* The .main-nav .nav-left/right styles are removed from here
+   as they are now encapsulated within Navbar.css */
 
-/* Chatbot box centered */
+/* 3. Chatbot Content Wrapper (The Flex Fix) */
 .chatbot-wrapper {
-  width: 100% !important;
-  max-width: 100% !important;
-  /* Height fills the space: 100vh - (header top margin) - (header height) - (wrapper margin top) - (bottom gap) */
-  height: calc(100vh - var(--page-padding-vertical) - 8px - var(--nav-height) - 8px - var(--page-padding-vertical)) !important; 
+  width: 100%;
   
-  min-height: 320px !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  margin-top: 8px !important; 
-  /* CRITICAL FIX 4: Add vertical margin for bottom gap */
-  margin-bottom: 16px !important; 
-  overflow: hidden !important; 
+  /* CRITICAL: Allows wrapper to fill remaining vertical height */
+  flex-grow: 1; 
+  height: 0; 
   
-  /* CRITICAL FIX 5: Padding remains 0 for full horizontal stretch */
-  padding: 0 !important; 
+  /* CRITICAL: Sets up horizontal space sharing for ChatWindow and Sidebar */
+  display: flex;
+  flex-direction: row; 
+  
+  min-height: 320px;
+  margin-top: 8px; 
+  margin-bottom: 16px; 
+  overflow: hidden; 
+  padding: 0; 
 }
 
-/* Small toggle control for opening/closing the conversation sidebar (NO BLUR) */
-.toggle-sidebar-button {
-  background: rgba(255, 255, 255, 0.1) !important;
-  color: #e6eef8 !important;
-  border: 1px solid rgba(255,255,255,0.15) !important;
-  padding: 8px 10px !important;
-  border-radius: 8px !important;
-  backdrop-filter: none !important; 
-  -webkit-backdrop-filter: none !important;
-}
-
-/* Responsive adjustments */
-@media (max-width: 900px) {
-  .main-nav { padding: 8px 10px !important; gap: 8px !important; }
-  .main-nav .nav-title { font-size: 1rem !important; }
-  .main-nav .nav-right button { padding: 6px 8px !important; }
-  .chatbot-wrapper { 
-      height: calc(100vh - var(--page-padding-vertical) - 8px - var(--nav-height) - 8px - var(--page-padding-vertical)) !important;
-  }
-}
-
-@media (max-width: 600px) {
-    .app-page { padding: 0 !important; } /* No padding at all on mobile */
-    :root { --page-padding-vertical: 8px !important; } 
-
-    .main-nav { 
-        flex-direction: column !important; 
-        align-items: stretch !important; 
-        padding: 10px 8px !important; 
-        top: 0 !important;
-        border-radius: 0 !important;
-    }
-    .main-nav .nav-right { justify-content: flex-start !important; gap: 6px !important; margin-top: 8px !important; }
-    
-    .chatbot-wrapper { 
-        margin-top: 6px !important; 
-        margin-bottom: 8px !important;
-        height: calc(100vh - 8px - 6px - var(--nav-height) - 6px - 8px) !important; 
-        padding: 0 !important; 
-    }
+/* Ensure ChatWindow/AuthForm takes full space within the wrapper */
+.chatbot-wrapper > * {
+    width: 100%;
+    height: 100%;
 }
