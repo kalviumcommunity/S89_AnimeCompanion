@@ -1,4 +1,4 @@
-/* frontend/src/components/Sidebar.module.css (FINAL CLEANUP) */
+/* frontend/src/components/Sidebar.module.css (FINAL UPDATE: Style Collapsed Logout) */
 
 /* Define variables if necessary, but generally use variables defined in :root */
 
@@ -28,24 +28,73 @@
 
 /* Collapsed state */
 .collapsed { 
-    width: 0 !important; 
-    min-width: 0 !important; 
+    /* 🎯 MODIFIED: Set the fixed small width for the icon-only view (e.g., 60px) */
+    width: 60px !important; 
+    min-width: 60px !important; 
+    /* Set padding to 0, since it's applied in the header-controls now */
     padding: 0 !important; 
-    overflow: hidden !important;
+    /* Only hide content that overflows horizontally */
+    overflow-x: hidden !important; 
+    overflow-y: hidden !important;
 }
 
-/* Sidebar Header (New Chat Button - NO BLUR) */
+/* ------------------------------------------- */
+/* Sidebar Header (Controls - The Container) */
+/* ------------------------------------------- */
 .sidebar-header-controls {
     display: flex !important;
-    justify-content: space-between !important;
+    /* Align buttons to the start and separate them */
+    justify-content: flex-start !important;
     align-items: center !important;
     margin-bottom: 12px !important;
-    padding: 0 !important; 
+    /* 🎯 MODIFIED: Add back padding for the OPEN state */
+    padding: 12px 10px !important; 
+    /* Spacing between the three top buttons */
+    gap: 8px !important;
+    
+    transition: flex-direction 250ms ease, padding 250ms ease !important;
 }
 
-/* New Chat Button (NO BLUR) */
+/* 🎯 NEW: Vertical Stacking for Collapsed State */
+.collapsed .sidebar-header-controls {
+    flex-direction: column !important; 
+    gap: 16px !important; /* Increase vertical gap between stacked buttons */
+    padding: 12px 10px !important; /* Keep padding for icons */
+    margin-bottom: 0 !important; /* No margin below header in collapsed state */
+}
+
+
+/* Home Navigation Button (NEWLY ADDED) */
+.home-nav-btn {
+    /* Base styles matching the new chat button aesthetic */
+    background: rgba(255, 255, 255, 0.15) !important; 
+    color: white !important;
+    padding: 10px 14px !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important; 
+    border-radius: 6px !important; 
+    font-weight: 500 !important;
+    justify-content: flex-start !important;
+    backdrop-filter: none !important;
+    transition: background 0.15s !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    
+    /* 🎯 CRITICAL for open state layout: Share space evenly with New Chat button */
+    width: auto !important; 
+    flex-grow: 1 !important;
+}
+
+.home-nav-btn:hover {
+    background: rgba(255, 255, 255, 0.25) !important;
+}
+
+/* New Chat Button (MODIFIED FOR 3-BUTTON LAYOUT) */
 .new-chat-btn {
-    width: 100% !important;
+    /* MODIFIED: Ensure it shares space with the Home button */
+    width: auto !important; 
+    flex-grow: 1 !important; /* Shares space with .home-nav-btn */
+    
     background: rgba(255, 255, 255, 0.15) !important; 
     color: white !important;
     padding: 10px 14px !important;
@@ -64,10 +113,65 @@
     background: rgba(255, 255, 255, 0.25) !important;
 }
 
-/* Sidebar Toggle Button */
-.sidebar-toggle-btn {
-    display: none !important; 
+/* ------------------------------------------- */
+/* Collapsed Button Styling (Applies to both Home and New Chat) */
+/* ------------------------------------------- */
+.collapsed .home-nav-btn,
+.collapsed .new-chat-btn {
+    width: 40px !important;
+    height: 40px !important;
+    padding: 0 !important;
+    flex-grow: 0 !important; /* Prevent growth */
+    justify-content: center !important; /* Center the icon */
+    margin: 0 !important; 
 }
+
+/* Hide the text span inside both buttons when collapsed */
+.collapsed .home-nav-btn .btn-text,
+.collapsed .new-chat-btn .btn-text {
+    display: none !important;
+}
+
+
+/* ------------------------------------------- */
+/* Sidebar Toggle Button (MOVED & UNHIDDEN) */
+/* ------------------------------------------- */
+.sidebar-toggle-btn {
+    /* 🎯 CRITICAL: Overrides 'display: none' from the previous version */
+    display: flex !important; 
+    
+    /* Style it as a compact square button */
+    flex-shrink: 0 !important; 
+    width: 40px !important; 
+    height: 40px !important;
+    padding: 0 !important; 
+    
+    background: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 6px !important; 
+    
+    /* MODIFIED: Ensure no margin is interfering in column layout */
+    margin-left: 0 !important; 
+    
+    color: white !important;
+    cursor: pointer !important;
+    transition: background 0.15s !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.sidebar-toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.25) !important;
+}
+
+/* 🎯 NEW: Ensure the toggle button is VISIBLE in the collapsed stack */
+.collapsed .sidebar-toggle-btn {
+    display: flex !important;
+    /* MODIFIED: Reset margin/growth in the column layout */
+    margin: 0 !important;
+    flex-grow: 0 !important;
+}
+
 
 /* Sidebar List */
 .conversation-list-container {
@@ -76,6 +180,11 @@
     min-height: 0 !important; 
     padding-right: 4px !important; 
     -webkit-overflow-scrolling: touch !important;
+}
+
+/* 🎯 NEW: Hide list when collapsed */
+.collapsed .conversation-list-container {
+    display: none !important;
 }
 
 .no-chats-message {
@@ -154,29 +263,47 @@
     
     border-top: 1px solid rgba(255, 255, 255, 0.15) !important;
     padding-top: 12px !important;
+    /* 🎯 MODIFIED: Add padding to align button content */
+    padding-bottom: 12px !important; 
+    padding-left: 10px !important;
+    padding-right: 10px !important; 
     
     display: flex !important;
     flex-direction: column !important;
     gap: 8px !important;
 }
 
-.user-info-status {
-    padding: 5px 0 8px 5px !important; 
-    color: #a0a0a0 !important;
-    font-size: 0.9rem !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
+/* 🎯 NEW: Collapsed Footer Container Style */
+.collapsed .sidebar-footer {
+    /* Center the button within the narrow bar */
+    align-items: center !important; 
+    justify-content: center !important;
+    /* 🎯 CRITICAL: We want the footer visible, so ensure no display: none is inherited */
+    display: flex !important; 
+    
+    /* Remove padding that was for the text content */
+    padding-top: 12px !important;
+    padding-bottom: 12px !important;
+    padding-left: 10px !important;
+    padding-right: 10px !important; 
 }
 
-.user-info-status strong {
-    color: var(--text-primary) !important;
-    font-weight: 600 !important;
+.user-info-status {
+    /* 🎯 CRITICAL: Hide user info text when sidebar is collapsed */
+    display: flex !important; /* Default for open state */
+    padding: 5px 0 8px 5px !important; 
+    /* ... (rest of user-info-status styles) ... */
+}
+
+/* 🎯 NEW: Hide user info text block when collapsed */
+.collapsed .user-info-status {
+    display: none !important;
 }
 
 
 /* Logout Button Styling */
 .logout-button-sidebar {
+    /* ... (Existing open state styles) ... */
     width: 100% !important;
     text-align: center !important;
     padding: 10px 14px !important;
@@ -188,13 +315,51 @@
     transition: background 0.2s !important;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
     font-weight: 500 !important;
+    
+    /* 🎯 MODIFIED: Must use flex for icon/text alignment */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important; 
+    gap: 8px !important;
 }
 
 .logout-button-sidebar:hover {
     background: #c02020 !important;
 }
 
+/* 🎯 NEW: Collapsed Logout Button Styles */
+.collapsed .logout-button-sidebar {
+    width: 40px !important;
+    height: 40px !important;
+    padding: 0 !important;
+    
+    /* Center icon within the small button */
+    justify-content: center !important; 
+    
+    /* Reset margins in the column layout */
+    margin: 0 auto !important; 
+}
+
+/* 🎯 NEW: Hide text explicitly when collapsed */
+.collapsed .logout-button-sidebar span {
+    display: none !important;
+}
+
 /* Original Settings button is no longer needed/used, removed its conflicting styles */
 .settings-btn {
+    display: none !important;
+}
+
+/* 🎯 NEW: Hide footer content area when collapsed (This is the conversation list) */
+.collapsed .sidebar-footer {
+    /* Ensuring the footer is a column and centered */
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
+    /* Keeping display: flex from the above .collapsed .sidebar-footer block */
+}
+
+/* 🎯 Redundant safeguard (This is the conversation list container, which is already conditionally rendered) */
+.collapsed .conversation-list-container {
     display: none !important;
 }

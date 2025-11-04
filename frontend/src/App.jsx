@@ -1,4 +1,4 @@
-// frontend/src/App.jsx
+// frontend/src/App.jsx (UPDATED: Passing setCurrentView to ChatWindow)
 
 import React, { useState } from 'react'; 
 import ChatWindow from './components/ChatWindow';
@@ -34,11 +34,12 @@ function App() {
           // HomePage needs setCurrentView to navigate to Chat or Recs
           return <HomePage setCurrentView={setCurrentView} />;
         case 'Chat':
-          // ChatWindow needs sidebar state management
+          // ChatWindow needs sidebar state management AND setCurrentView
           return (
             <ChatWindow 
               sidebarOpen={sidebarOpen} 
               setSidebarOpen={setSidebarOpen} 
+              setCurrentView={setCurrentView} // 🎯 ADDED: Passing navigation function
             />
           );
         case 'Recommendations':
@@ -52,13 +53,15 @@ function App() {
     // The top-level 'app-page' container handles the full-screen background and structure.
     <div className="app-page">
       
-      {/* 🌟 Navbar component is responsible for all main navigation */}
-      <Navbar
-          currentView={currentView}
-          setCurrentView={setCurrentView}
-          sidebarOpen={sidebarOpen}
-          setSidebarOpen={setSidebarOpen}
-      />
+      {/* 🎯 CRITICAL CHANGE: Only render Navbar if the current view is NOT 'Chat' */}
+      {currentView !== 'Chat' && (
+        <Navbar
+            currentView={currentView}
+            setCurrentView={setCurrentView}
+            sidebarOpen={sidebarOpen}
+            setSidebarOpen={setSidebarOpen}
+        />
+      )}
 
       {/* Main Content Wrapper: This container holds the current view (AuthForm, HomePage, ChatWindow, etc.) */}
       <div className="chatbot-wrapper">
