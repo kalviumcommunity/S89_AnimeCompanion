@@ -1,4 +1,4 @@
-// frontend/src/components/Sidebar.jsx (UPDATED)
+// frontend/src/components/Sidebar.jsx (FINAL UPDATE: Logout Icon in Collapsed State)
 
 import React from 'react';
 import { useAuth } from '../context/AuthContext'; // 🌟 Import Auth Context
@@ -27,13 +27,14 @@ const DeleteIcon = () => (
 export default function Sidebar({
   conversationList = [],
   fetchMessages = () => {},
-  startNewChat = () => {},
+  startNewChat = () => {}, 
   deleteConversation = () => {},
   conversationId = null,
   hoverId = null,
   setHoverId = () => {},
   sidebarOpen = true,
   setSidebarOpen = () => {},
+  setCurrentView = () => {}, // Assuming this prop is available
 }) {
   
   // 🌟 Get user and logout from context
@@ -49,33 +50,55 @@ export default function Sidebar({
   return (
     <aside className={`${styles['app-sidebar']} ${sidebarOpen ? styles.open : styles.collapsed}`}>
       
-      {/* Top section: New Chat button and sidebar controls */}
+      {/* 🎯 HEADER: Contains the three primary buttons for all states */}
       <div className={styles['sidebar-header-controls']}>
+        
+        {/* 1. HOME BUTTON */}
+        <button 
+            onClick={() => setCurrentView('Home')} 
+            className={styles['home-nav-btn']} 
+            title="Go to Home Screen"
+        >
+            {/* Home Icon */}
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            
+            {sidebarOpen && <span className={styles['btn-text']}>Home</span>}
+        </button>
+
+        {/* 2. NEW CHAT BUTTON */}
         <button 
           onClick={startNewChat} 
           className={styles['new-chat-btn']} 
-          title="Start new chat"
+          title="Start a New Conversation"
         >
-            {/* Using a modern icon for new chat */}
+            {/* New Chat Icon (Plus sign) */}
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-            {sidebarOpen && <span className={styles['btn-text']}>New Chat</span>}
+            
+            {sidebarOpen && <span className={styles['btn-text']}>New</span>}
         </button>
 
-        {/* Toggle button for collapsing/expanding the sidebar */}
+        {/* 3. SHOW/HIDE CHATS TOGGLE BUTTON */}
         <button 
             onClick={() => setSidebarOpen(prev => !prev)} 
             className={styles['sidebar-toggle-btn']} 
-            aria-label={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+            aria-label={sidebarOpen ? "Hide Chats" : "Show Chats"}
+            title={sidebarOpen ? "Hide Chats" : "Show Chats"}
         >
-             {/* Simple arrow icon for collapse/expand */}
-             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+             {/* Icon changes based on state: Arrow for collapse/expand */}
+             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                {sidebarOpen ? (
+                    <polyline points="15 18 9 12 15 6" /> // Arrow left (Collapse)
+                ) : (
+                    <polyline points="9 18 15 12 9 6" /> // Arrow right (Expand)
+                )}
+             </svg>
         </button>
       </div>
 
-      {/* Conversation List (Only visible when open) */}
+      {/* 🎯 MAIN CONTENT/LIST AREA: ONLY RENDERED IF SIDEBAR IS OPEN */}
       {sidebarOpen && (
-        <>
-            <div className={styles['conversation-list-container']}>
+        <div className={styles['conversation-list-container']}>
+        {/* ... (conversation list rendering) ... */}
             {conversationList.length === 0 ? (
                 <p className={styles['no-chats-message']}>No history yet.</p>
             ) : (
@@ -111,28 +134,33 @@ export default function Sidebar({
                 ))}
                 </div>
             )}
-            </div>
-            
-            {/* 🌟 USER INFO & LOGOUT FOOTER */}
-            <div className={styles['sidebar-footer']}>
-                <div className={styles['user-info-status']}>
-                    <span className={styles['user-name-label']}>
-                        Logged in as: <strong>{user?.username || 'User'}</strong>
-                    </span>
-                </div>
-                {/* Logout Button */}
-                <button 
-                    onClick={logout} 
-                    className={styles['logout-button-sidebar']}
-                >
-                    Logout
-                </button>
-                
-                {/* Original Settings/Placeholder button - kept for structure */}
-                {/* <button className={styles['settings-btn']}>Settings</button> */}
-            </div>
-        </>
+        </div>
       )}
+      
+      {/* 🎯 LOGOUT/USER FOOTER: MOVED OUTSIDE CONDITIONAL BLOCK */}
+      <div className={styles['sidebar-footer']}>
+          {/* User Info (Only visible when open) */}
+          {sidebarOpen && (
+              <div className={styles['user-info-status']}>
+                  <span className={styles['user-name-label']}>
+                      Logged in as: <strong>{user?.username || 'User'}</strong>
+                  </span>
+              </div>
+          )}
+          
+          {/* 🎯 Logout Button (Always rendered, shrinks via CSS) */}
+          <button 
+              onClick={logout} 
+              className={styles['logout-button-sidebar']}
+              title="Logout"
+          >
+              {/* Logout Icon */}
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+              
+              {/* Text: Only visible when open */}
+              {sidebarOpen && <span className={styles['btn-text']}>Logout</span>}
+          </button>
+      </div>
     </aside>
   );
 }

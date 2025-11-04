@@ -1,4 +1,4 @@
-/* frontend/src/components/Navbar.css */
+/* frontend/src/components/Navbar.css (FINAL UPDATE: Added Back Button Styles) */
 
 /* --- Navbar Container --- */
 .main-nav {
@@ -24,6 +24,8 @@
 .nav-left { 
     display: flex; 
     align-items: center; 
+    /* 🎯 ADDED: Space between the Back Button and the Title */
+    gap: 10px; 
 }
 
 .nav-title { 
@@ -58,6 +60,29 @@
 .nav-btn:disabled {
     opacity: 0.6;
     cursor: default;
+}
+
+/* 🎯 NEW: Back Button Styles */
+.back-btn {
+    /* Style for the back button, making it compact and minimal */
+    padding: 6px 8px;
+    background: none;
+    border: none;
+    color: white;
+    /* Ensure the icon is centered and visible */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.back-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
+.back-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
 }
 
 .logout-button {
